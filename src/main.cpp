@@ -14,7 +14,6 @@ void resizeWindow(sf::RenderWindow& window, const sf::Vector2u& size) {
 	window.setView(view);
 }
 
-
 int main() {
 	using namespace YOBA;
 	using namespace pizda;
@@ -80,58 +79,55 @@ int main() {
 	slider.setValue(0.5f);
 	rows += &slider;
 
-	//resizeWindow(sf::Vector2u(target.getSize().getWidth(), target.getSize().getHeight()));
-
-	while(window.isOpen()) {
-		while(const auto event = window.pollEvent()) {
-			if(event->is<sf::Event::Closed>()) {
-				window.close();
-			}
-			else if(event->is<sf::Event::MouseButtonPressed>()) {
+	while (window.isOpen()) {
+		while (const auto event = window.pollEvent()) {
+			if (event->is<sf::Event::MouseButtonPressed>()) {
 				auto mouseEvent = event->getIf<sf::Event::MouseButtonPressed>();
 
 				if(mouseEvent->button == sf::Mouse::Button::Left) {
 					PointerDownEvent pointerDownEvent {
 						Point(
-							mouseEvent->position.x / renderingTarget.getRenderingScale(),
-							mouseEvent->position.y / renderingTarget.getRenderingScale()
+							static_cast<int32_t>(static_cast<float>(mouseEvent->position.x) / renderingTarget.getRenderingScale()),
+							static_cast<int32_t>(static_cast<float>(mouseEvent->position.y) / renderingTarget.getRenderingScale())
 						)
 					};
 
 					application.pushEvent(&pointerDownEvent);
 				}
 			}
-			else if(event->is<sf::Event::MouseButtonReleased>()) {
+			else if (event->is<sf::Event::MouseButtonReleased>()) {
 				auto mouseEvent = event->getIf<sf::Event::MouseButtonReleased>();
 
 				if(mouseEvent->button == sf::Mouse::Button::Left) {
 					PointerUpEvent pointerUpEvent {
 						Point(
-							mouseEvent->position.x / renderingTarget.getRenderingScale(),
-							mouseEvent->position.y / renderingTarget.getRenderingScale()
+							static_cast<int32_t>(static_cast<float>(mouseEvent->position.x) / renderingTarget.getRenderingScale()),
+							static_cast<int32_t>(static_cast<float>(mouseEvent->position.y) / renderingTarget.getRenderingScale())
 						)
 					};
 
 					application.pushEvent(&pointerUpEvent);
 				}
 			}
-			else if(event->is<sf::Event::MouseMoved>() && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
+			else if (event->is<sf::Event::MouseMoved>() && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
 				auto mouseEvent = event->getIf<sf::Event::MouseMoved>();
 
 				PointerDragEvent pointerDragEvent {
 					Point(
-						mouseEvent->position.x / renderingTarget.getRenderingScale(),
-						mouseEvent->position.y / renderingTarget.getRenderingScale()
+						static_cast<int32_t>(static_cast<float>(mouseEvent->position.x) / renderingTarget.getRenderingScale()),
+						static_cast<int32_t>(static_cast<float>(mouseEvent->position.y) / renderingTarget.getRenderingScale())
 					)
 				};
 
 				application.pushEvent(&pointerDragEvent);
 			}
-
-			if(event->is<sf::Event::Resized>()) {
+			else if (event->is<sf::Event::Resized>()) {
 				auto resizedEvent = event->getIf<sf::Event::Resized>();
 
 				resizeWindow(window, resizedEvent->size);
+			}
+			else if (event->is<sf::Event::Closed>()) {
+				window.close();
 			}
 		}
 
