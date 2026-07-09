@@ -5,23 +5,30 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include(FetchContent)
-FetchContent_Declare(SFML
-    GIT_REPOSITORY https://github.com/SFML/SFML.git
-    GIT_TAG 3.1.0
-    GIT_SHALLOW ON
-    EXCLUDE_FROM_ALL
-    SYSTEM)
-FetchContent_MakeAvailable(SFML)
-
+# Main
 file(GLOB_RECURSE MAIN_SOURCES
     "src/*.cpp"
 )
 
-add_subdirectory(lib/YOBA)
 add_executable(main ${MAIN_SOURCES})
 target_compile_features(main PRIVATE cxx_std_23)
+
+# SFML
+include(FetchContent)
+FetchContent_Declare(
+    SFML
+    GIT_REPOSITORY https://github.com/SFML/SFML.git
+    GIT_TAG 3.1.0
+    GIT_SHALLOW ON
+    EXCLUDE_FROM_ALL
+    SYSTEM
+)
+FetchContent_MakeAvailable(SFML)
+
 target_link_libraries(main PRIVATE SFML::Graphics)
+
+# YOBA
+add_subdirectory(lib/YOBA)
 target_link_libraries(main PRIVATE YOBA)
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT main)
