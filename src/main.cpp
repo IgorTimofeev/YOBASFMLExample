@@ -11,6 +11,8 @@ int main() {
 	using namespace YOBA;
 	using namespace pizda;
 
+	// -------------------------------- SFML window --------------------------------
+
 	constexpr static float renderingScale = 2;
 	constexpr static Size resolution { 240, 320 };
 
@@ -27,11 +29,15 @@ int main() {
 		}
 	};
 
+	// -------------------------------- YOBA renderer & rendering target --------------------------------
+
 	SFMLSpriteRenderingTarget renderingTarget {};
 	renderingTarget.setup(resolution, renderingScale);
 
 	RGB888BufferedRenderer renderer {};
 	renderer.setTarget(&renderingTarget);
+
+	// -------------------------------- Tons of UI components --------------------------------
 
 	Theme::setup();
 
@@ -126,6 +132,8 @@ int main() {
 	imageView2.setImage(&image2);
 	imagesRow += &imageView2;
 
+	// -------------------------------- Main loop with SFML event handling --------------------------------
+
 	while (window.isOpen()) {
 		while (const auto event = window.pollEvent()) {
 			if (event->is<sf::Event::MouseButtonPressed>()) {
@@ -180,6 +188,8 @@ int main() {
 				window.close();
 			}
 		}
+
+		// -------------------------------- UI tick handling & rendering --------------------------------
 
 		application.invalidateRender();
 		application.tick();
