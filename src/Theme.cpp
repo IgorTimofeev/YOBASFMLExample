@@ -32,9 +32,12 @@ namespace pizda {
 
 			keyboard->setCyclicLayoutBuilders({
 				[] {
-				return new EnglishKeyboardLayout();
-			}
-				});
+					return new EnglishKeyboardLayout();
+				},
+				[] {
+					return new RussianKeyboardLayout();
+				}
+			});
 		});
 	}
 
@@ -119,6 +122,8 @@ namespace pizda {
 		sw->setCheckedColor(&Theme::accent1);
 
 		sw->setHandleColor(&Theme::fg1);
+
+		sw->setAnimationDuration(250'000);
 	}
 
 	void Theme::apply(Slider* slider) {

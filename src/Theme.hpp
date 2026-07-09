@@ -3,8 +3,8 @@
 #include <YOBA/Core.hpp>
 #include <YOBA/UI.hpp>
 #include <YOBA/Resources/Fonts/PIXY10Font.hpp>
-#include <YOBA/Resources/Fonts/Vaticanus8Font.hpp>
-#include <YOBA/Resources/Fonts/Unscii16Font.hpp>
+// #include <YOBA/Resources/Fonts/Vaticanus8Font.hpp>
+// #include <YOBA/Resources/Fonts/Unscii16Font.hpp>
 
 namespace pizda {
 	using namespace YOBA;

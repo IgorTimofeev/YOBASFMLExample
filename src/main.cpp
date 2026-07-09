@@ -1,11 +1,10 @@
-#include <SFML/Graphics.hpp>
 
 #include <YOBA/Core.hpp>
 #include <YOBA/Rendering.hpp>
 #include <YOBA/UI.hpp>
-#include <YOBA/Resources/Fonts/Unscii16Font.hpp>
 
-#include "MenuIconAutopilotSettingsImage.hpp"
+#include "Resources/SelectedAirspeedImage.hpp"
+#include "Resources/NavDisplayImage.hpp"
 #include "Theme.hpp"
 
 int main() {
@@ -15,10 +14,6 @@ int main() {
 	constexpr static float renderingScale = 2;
 	constexpr static Size resolution { 240, 320 };
 
-	sf::ContextSettings contextSettings {
-		.antiAliasingLevel = 8
-	};
-
 	sf::RenderWindow window {
 		sf::VideoMode({
 			static_cast<uint32_t>(static_cast<float>(resolution.getWidth()) * renderingScale),
@@ -27,13 +22,15 @@ int main() {
 		"YOBA | Desktop demo",
 		sf::Style::None | sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize,
 		sf::State::Windowed,
-		contextSettings
+		sf::ContextSettings {
+			.antiAliasingLevel = 8
+		}
 	};
 
-	SFMLWindowRenderingTarget renderingTarget {};
-	RGB888BufferedRenderer renderer {};
+	SFMLSpriteRenderingTarget renderingTarget {};
+	renderingTarget.setup(resolution, renderingScale);
 
-	renderingTarget.setup(&window, resolution, renderingScale);
+	RGB888BufferedRenderer renderer {};
 	renderer.setTarget(&renderingTarget);
 
 	Theme::setup();
@@ -51,11 +48,11 @@ int main() {
 	rows.setMargin({ 15 });
 	scrollView += &rows;
 
-	TextView titleText {};
-	Theme::applyPageTitle(&titleText);
-	titleText.setHorizontalAlignment(Alignment::center);
-	titleText.setText("Heresy counter");
-	rows += &titleText;
+	TextView titleTextView {};
+	Theme::applyPageTitle(&titleTextView);
+	titleTextView.setHorizontalAlignment(Alignment::center);
+	titleTextView.setText("Heresy counter");
+	rows += &titleTextView;
 
 	SevenSegment seven {};
 	seven.setActiveColor(&Theme::fg1);
@@ -87,16 +84,16 @@ int main() {
 	textField.setPlaceholder("Type something");
 	rows += &textField;
 
-	TextField numericTextField {};
-	Theme::apply(&numericTextField);
-	numericTextField.setPlaceholder("123");
-	numericTextField.setKeyboardLayoutOptions(KeyboardLayoutOptions::numeric);
-	rows += &numericTextField;
-
 	Slider slider {};
 	Theme::apply(&slider);
 	slider.setValue(0.5f);
 	rows += &slider;
+
+	ProgressBar progressBar {};
+	Theme::apply(&progressBar);
+	progressBar.setFillColor(&Theme::sky1);
+	progressBar.setValue(0.75f);
+	rows += &progressBar;
 
 	RelativeStackLayout switchRow {};
 	switchRow.setOrientation(Orientation::horizontal);
@@ -105,7 +102,7 @@ int main() {
 	TextView switchRowText {};
 	Theme::apply(&switchRowText);
 	switchRowText.setVerticalAlignment(Alignment::center);
-	switchRowText.setText("Pimpo4ka");
+	switchRowText.setText("Razyob mode");
 	switchRow += &switchRowText;
 
 	Switch switchRowSw {};
@@ -114,15 +111,25 @@ int main() {
 	switchRow += &switchRowSw;
 	switchRow.setAutoSize(&switchRowSw);
 
-	MenuIconAutopilotSettingsImage img {};
-	ImageView imageView {};
-	imageView.setImage(&img);
-	rows += &imageView;
+	StackLayout imagesRow {};
+	imagesRow.setOrientation(Orientation::horizontal);
+	imagesRow.setGap(10);
+	rows += &imagesRow;
+
+	SelectedAirspeedImage image1 {};
+	ImageView imageView1 {};
+	imageView1.setImage(&image1);
+	imagesRow += &imageView1;
+
+	NavDisplayImage image2 {};
+	ImageView imageView2 {};
+	imageView2.setImage(&image2);
+	imagesRow += &imageView2;
 
 	while (window.isOpen()) {
 		while (const auto event = window.pollEvent()) {
 			if (event->is<sf::Event::MouseButtonPressed>()) {
-				auto mouseEvent = event->getIf<sf::Event::MouseButtonPressed>();
+				const auto mouseEvent = event->getIf<sf::Event::MouseButtonPressed>();
 
 				if (mouseEvent->button == sf::Mouse::Button::Left) {
 					PointerDownEvent pointerDownEvent {
@@ -136,7 +143,7 @@ int main() {
 				}
 			}
 			else if (event->is<sf::Event::MouseButtonReleased>()) {
-				auto mouseEvent = event->getIf<sf::Event::MouseButtonReleased>();
+				const auto mouseEvent = event->getIf<sf::Event::MouseButtonReleased>();
 
 				if (mouseEvent->button == sf::Mouse::Button::Left) {
 					PointerUpEvent pointerUpEvent {
@@ -150,7 +157,7 @@ int main() {
 				}
 			}
 			else if (event->is<sf::Event::MouseMoved>() && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
-				auto mouseEvent = event->getIf<sf::Event::MouseMoved>();
+				const auto mouseEvent = event->getIf<sf::Event::MouseMoved>();
 
 				PointerDragEvent pointerDragEvent {
 					Point(
@@ -174,16 +181,12 @@ int main() {
 			}
 		}
 
-		window.clear(sf::Color::Black);
-
-		// renderer.clear(&Theme::fg1);
-		// renderer.renderFilledRectangle({ 0, 0, 100, 50 }, &Theme::magenta1);
-		// renderer.flush();
-
 		application.invalidateRender();
 		application.tick();
 		application.render();
 
+		window.clear(sf::Color::Black);
+		window.draw(renderingTarget.getSprite());
 		window.display();
 	}
 }
