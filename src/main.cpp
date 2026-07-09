@@ -5,14 +5,8 @@
 #include <YOBA/UI.hpp>
 #include <YOBA/Resources/Fonts/Unscii16Font.hpp>
 
+#include "MenuIconAutopilotSettingsImage.hpp"
 #include "Theme.hpp"
-
-void resizeWindow(sf::RenderWindow& window, const sf::Vector2u& size) {
-	auto view = window.getView();
-	view.setSize(sf::Vector2f(size));
-	view.setCenter(view.getSize() / 2.f);
-	window.setView(view);
-}
 
 int main() {
 	using namespace YOBA;
@@ -36,8 +30,8 @@ int main() {
 		contextSettings
 	};
 
-	SFMLRenderingTarget renderingTarget {};
-	SFMLRenderer renderer {};
+	SFMLWindowRenderingTarget renderingTarget {};
+	RGB888BufferedRenderer renderer {};
 
 	renderingTarget.setup(&window, resolution, renderingScale);
 	renderer.setTarget(&renderingTarget);
@@ -48,19 +42,44 @@ int main() {
 	application.setRenderer(&renderer);
 	application.setBackgroundColor(&Theme::bg1);
 
+	ScrollView scrollView {};
+	Theme::apply(&scrollView);
+	application += &scrollView;
+
 	StackLayout rows {};
 	rows.setGap(10);
 	rows.setMargin({ 15 });
-	application += &rows;
+	scrollView += &rows;
 
 	TextView titleText {};
 	Theme::applyPageTitle(&titleText);
-	titleText.setText("PFD options");
+	titleText.setHorizontalAlignment(Alignment::center);
+	titleText.setText("Heresy counter");
 	rows += &titleText;
+
+	SevenSegment seven {};
+	seven.setActiveColor(&Theme::fg1);
+	seven.setInactiveColor(&Theme::bg4);
+	seven.setSegmentThickness(3);
+	seven.setSegmentLength(10);
+	seven.setDigitCount(4);
+	seven.setHorizontalAlignment(Alignment::center);
+	rows += &seven;
+
+	TextView descriptionText {};
+	Theme::applyDescription(&descriptionText);
+	descriptionText.setWrappingEnabled(true);
+	descriptionText.setText("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since 1966");
+	rows += &descriptionText;
 
 	Button button {};
 	Theme::applyPrimary(&button);
 	button.setText("PULL UP");
+
+	button.setOnClick([&seven] {
+		seven.setValue(seven.getValue() + 1);
+	});
+
 	rows += &button;
 
 	TextField textField {};
@@ -79,12 +98,33 @@ int main() {
 	slider.setValue(0.5f);
 	rows += &slider;
 
+	RelativeStackLayout switchRow {};
+	switchRow.setOrientation(Orientation::horizontal);
+	rows += &switchRow;
+
+	TextView switchRowText {};
+	Theme::apply(&switchRowText);
+	switchRowText.setVerticalAlignment(Alignment::center);
+	switchRowText.setText("Pimpo4ka");
+	switchRow += &switchRowText;
+
+	Switch switchRowSw {};
+	Theme::apply(&switchRowSw);
+	switchRowSw.setVerticalAlignment(Alignment::center);
+	switchRow += &switchRowSw;
+	switchRow.setAutoSize(&switchRowSw);
+
+	MenuIconAutopilotSettingsImage img {};
+	ImageView imageView {};
+	imageView.setImage(&img);
+	rows += &imageView;
+
 	while (window.isOpen()) {
 		while (const auto event = window.pollEvent()) {
 			if (event->is<sf::Event::MouseButtonPressed>()) {
 				auto mouseEvent = event->getIf<sf::Event::MouseButtonPressed>();
 
-				if(mouseEvent->button == sf::Mouse::Button::Left) {
+				if (mouseEvent->button == sf::Mouse::Button::Left) {
 					PointerDownEvent pointerDownEvent {
 						Point(
 							static_cast<int32_t>(static_cast<float>(mouseEvent->position.x) / renderingTarget.getRenderingScale()),
@@ -98,7 +138,7 @@ int main() {
 			else if (event->is<sf::Event::MouseButtonReleased>()) {
 				auto mouseEvent = event->getIf<sf::Event::MouseButtonReleased>();
 
-				if(mouseEvent->button == sf::Mouse::Button::Left) {
+				if (mouseEvent->button == sf::Mouse::Button::Left) {
 					PointerUpEvent pointerUpEvent {
 						Point(
 							static_cast<int32_t>(static_cast<float>(mouseEvent->position.x) / renderingTarget.getRenderingScale()),
@@ -124,7 +164,10 @@ int main() {
 			else if (event->is<sf::Event::Resized>()) {
 				auto resizedEvent = event->getIf<sf::Event::Resized>();
 
-				resizeWindow(window, resizedEvent->size);
+				auto view = window.getView();
+				view.setSize(sf::Vector2f(resizedEvent->size));
+				view.setCenter(view.getSize() / 2.f);
+				window.setView(view);
 			}
 			else if (event->is<sf::Event::Closed>()) {
 				window.close();
@@ -132,6 +175,10 @@ int main() {
 		}
 
 		window.clear(sf::Color::Black);
+
+		// renderer.clear(&Theme::fg1);
+		// renderer.renderFilledRectangle({ 0, 0, 100, 50 }, &Theme::magenta1);
+		// renderer.flush();
 
 		application.invalidateRender();
 		application.tick();
