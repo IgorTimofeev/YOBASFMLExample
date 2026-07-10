@@ -1,7 +1,43 @@
 #include "Theme.hpp"
 
 namespace pizda {
+	RGB888Color Theme::bg1 {};
+	RGB888Color Theme::bg2 {};
+	RGB888Color Theme::bg3 {};
+	RGB888Color Theme::bg4 {};
+	RGB888Color Theme::bg5 {};
+	RGB888Color Theme::bg6 {};
+	RGB888Color Theme::bg7 {};
+	RGB888Color Theme::fg1 {};
+	RGB888Color Theme::fg2 {};
+	RGB888Color Theme::fg3 {};
+	RGB888Color Theme::fg4 {};
+	RGB888Color Theme::fg5 {};
+	RGB888Color Theme::fg6 {};
+	RGB888Color Theme::fg7 {};
+	RGB888Color Theme::accent1 {};
+	RGB888Color Theme::accent2 {};
+	RGB888Color Theme::good1 {};
+	RGB888Color Theme::good2 {};
+	RGB888Color Theme::bad1 {};
+	RGB888Color Theme::bad2 {};
+	RGB888Color Theme::bad3 {};
+	RGB888Color Theme::red {};
+	RGB888Color Theme::green1 {};
+	RGB888Color Theme::green2 {};
+	RGB888Color Theme::blue {};
+	RGB888Color Theme::magenta1 {};
+	RGB888Color Theme::magenta2 {};
+	RGB888Color Theme::ocean {};
+	RGB888Color Theme::yellow {};
+	RGB888Color Theme::ground1 {};
+	RGB888Color Theme::ground2 {};
+	RGB888Color Theme::sky1 {};
+	RGB888Color Theme::sky2 {};
+
 	void Theme::setup() {
+		setColorScheme(true);
+
 		// Keyboard
 		KeyboardController::setOnShow([](Keyboard* keyboard) {
 			keyboard->setFont(&Theme::fontNormal);
@@ -39,6 +75,83 @@ namespace pizda {
 				}
 			});
 		});
+	}
+
+	void Theme::setColorScheme(const bool dark) {
+		if (dark) {
+			bg1 = { 0x000000 };
+			bg2 = { 0x0C0C0C };
+			bg3 = { 0x1C1C1C };
+			bg4 = { 0x2C2C2C };
+			bg5 = { 0x3C3C3C };
+			bg6 = { 0x4C4C4C };
+			bg7 = { 0x5C5C5C };
+
+			fg1 = { 0xF0F0F0 };
+			fg2 = { 0xCCCCCC };
+			fg3 = { 0x999999 };
+			fg4 = { 0x888888 };
+			fg5 = { 0x777777 };
+			fg6 = { 0x666666 };
+			fg7 = { 0x555555 };
+
+			accent1 = { 0xffd200 };
+			accent2 = { 0x997e53 };
+			good1 = { 0x1db153 };
+			good2 = { 0x28DA69 };
+			bad1 = { 0xf24949 };
+			bad2 = { 0x962828 };
+			bad3 = { 0x4b1313 };
+			red = { 0xff0000 };
+			green1 = { 0x00FF00 };
+			green2 = { 0x007F00 };
+			blue = { 0x0000FF };
+			magenta1 = { 0xFF00FF };
+			magenta2 = { 0xAA00AA };
+			ocean = { 0x00FFFF };
+			yellow = { 0xffd200 };
+			ground1 = { 0x97b838 };
+			ground2 = { 0xdef2a2 };
+			sky1 = { 0x317fcb };
+			sky2 = { 0xaed1f2 };
+		}
+		else {
+			bg1 = { 0xF0F0F0 };
+			bg2 = { 0xCCCCCC };
+			bg3 = { 0x999999 };
+			bg4 = { 0x888888 };
+			bg5 = { 0x777777 };
+			bg6 = { 0x666666 };
+			bg7 = { 0x555555 };
+
+			fg1 = { 0x000000 };
+			fg2 = { 0x0C0C0C };
+			fg3 = { 0x1C1C1C };
+			fg4 = { 0x2C2C2C };
+			fg5 = { 0x3C3C3C };
+			fg6 = { 0x4C4C4C };
+			fg7 = { 0x5C5C5C };
+
+			accent1 = { 0xffd200 };
+			accent2 = { 0x997e53 };
+			good1 = { 0x1db153 };
+			good2 = { 0x28DA69 };
+			bad1 = { 0xf24949 };
+			bad2 = { 0x962828 };
+			bad3 = { 0x4b1313 };
+			red = { 0xff0000 };
+			green1 = { 0x00FF00 };
+			green2 = { 0x007F00 };
+			blue = { 0x0000FF };
+			magenta1 = { 0xFF00FF };
+			magenta2 = { 0xAA00AA };
+			ocean = { 0x00FFFF };
+			yellow = { 0xffd200 };
+			ground1 = { 0x97b838 };
+			ground2 = { 0xdef2a2 };
+			sky1 = { 0x317fcb };
+			sky2 = { 0xaed1f2 };
+		}
 	}
 
 	void Theme::apply(TextView* text) {

@@ -9,6 +9,7 @@
 
 #include "Resources/Images.hpp"
 #include "Theme.hpp"
+#include <YOBA/UI/MarginLayout.hpp>
 
 int main() {
 	using namespace YOBA;
@@ -46,7 +47,6 @@ int main() {
 
 	Theme::setup();
 
-
 	Application application {};
 	application.setRenderer(&renderer);
 	application.setBackgroundColor(&Theme::bg1);
@@ -55,10 +55,12 @@ int main() {
 	Theme::apply(&scrollView);
 	application += &scrollView;
 
+	MarginLayout rowsMarginLayout {{ 15 }};
+	scrollView += &rowsMarginLayout;
+
 	StackLayout rows {};
 	rows.setGap(10);
-	rows.setMargin({ 15 });
-	scrollView += &rows;
+	rowsMarginLayout += &rows;
 
 	const auto addTitle1 = [&rows](const std::string_view text) -> TextView* {
 		const auto textView = new TextView {};
@@ -71,12 +73,13 @@ int main() {
 	};
 
 	const auto addTitle2 = [&rows](const std::string_view text) -> TextView* {
+		const auto marginLayout = new MarginLayout {{ 0, 0, 0, -5 }};
+		rows += marginLayout;
+
 		const auto textView = new TextView {};
 		Theme::applyTitle(textView);
-		textView->setMargin(Margin(0, 0, 0, -10));
 		textView->setText(text);
-
-		rows += textView;
+		*marginLayout += textView;
 
 		return textView;
 	};
@@ -143,12 +146,14 @@ int main() {
 		const auto imageView = new ImageView { image };
 		*imageAndBadgeLayout += imageView;
 
+		const auto marginLayout = new MarginLayout {{ 0, -3, -3, 0 }};
+		*imageAndBadgeLayout += marginLayout;
+
 		const auto badge = new Badge {};
 		Theme::apply(badge);
-		badge->setMargin(Margin(0, -3, -3, 0));
 		badge->setAlignment(Alignment::end, Alignment::start);
 		badge->setText(badgeText);
-		*imageAndBadgeLayout += badge;
+		*marginLayout += badge;
 	};
 
 	addImageWithBadge(&Images::menuIconDev, "1");
@@ -186,7 +191,12 @@ int main() {
 		return sw;
 	};
 
-	addTextAndSwitch("Dark theme", &Theme::accent1, true);
+	const auto darkThemeSwitch = addTextAndSwitch("Dark theme", &Theme::accent1, true);
+
+	darkThemeSwitch->setOnIsActiveChanged([&darkThemeSwitch] {
+		Theme::setColorScheme(darkThemeSwitch->isActive());
+	});
+
 	addTextAndSwitch("Large penis", &Theme::sky1, true);
 
 	// -------------------------------- Sliders --------------------------------
@@ -210,10 +220,10 @@ int main() {
 	const auto pagePaddingSlider = addSlider();
 	pagePaddingSlider->setMinimumValue(0);
 	pagePaddingSlider->setMaximumValue(50);
-	pagePaddingSlider->setValue(rows.getMargin().getLeft());
+	pagePaddingSlider->setValue(rowsMarginLayout.getMargin().getLeft());
 
-	pagePaddingSlider->setOnValueChanged([&rows, pagePaddingSlider] {
-		rows.setMargin({
+	pagePaddingSlider->setOnValueChanged([&rowsMarginLayout, pagePaddingSlider] {
+		rowsMarginLayout.setMargin({
 			static_cast<uint16_t>(pagePaddingSlider->getValue())
 		});
 	});
@@ -258,6 +268,7 @@ int main() {
 
 	ProgressBar progressBar {};
 	Theme::apply(&progressBar);
+	progressBar.setFillColor(&Theme::bad1);
 	progressBar.setValue(0);
 	rows += &progressBar;
 
