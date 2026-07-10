@@ -3,6 +3,7 @@
 #include <YOBA/Core.hpp>
 #include <YOBA/UI.hpp>
 #include <YOBA/Resources/Fonts/PIXY10Font.hpp>
+
 // #include <YOBA/Resources/Fonts/Vaticanus8Font.hpp>
 // #include <YOBA/Resources/Fonts/Unscii16Font.hpp>
 
@@ -85,5 +86,6 @@ namespace pizda {
 			static void applyPageTitle(TextView* text);
 			static void applyTitle(TextView* text);
 			static void applyDescription(TextView* text);
+			static void apply(Divider* divider);
 	};
 }

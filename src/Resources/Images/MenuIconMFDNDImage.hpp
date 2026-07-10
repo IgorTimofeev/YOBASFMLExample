@@ -8,9 +8,9 @@
 namespace pizda {
 	using namespace YOBA;
 
-	class NavDisplayImage : public Image {
+	class MenuIconMFDNDImage : public Image {
 		public:
-			constexpr NavDisplayImage() : Image(
+			constexpr MenuIconMFDNDImage() : Image(
 				ColorModel::RGB888,
 				ImageOptions::alpha1Bit,
 				Size(45, 33),

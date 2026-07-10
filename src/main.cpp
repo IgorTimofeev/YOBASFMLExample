@@ -1,10 +1,12 @@
 
+#include <chrono>
+#include <string>
+
 #include <YOBA/Core.hpp>
 #include <YOBA/Rendering.hpp>
 #include <YOBA/UI.hpp>
 
-#include "Resources/SelectedAirspeedImage.hpp"
-#include "Resources/NavDisplayImage.hpp"
+#include "Resources/Images.hpp"
 #include "Theme.hpp"
 
 int main() {
@@ -16,7 +18,7 @@ int main() {
 	constexpr static float renderingScale = 2;
 	constexpr static Size resolution { 240, 320 };
 
-	sf::RenderWindow window {
+	sf::RenderWindow SFWindow {
 		sf::VideoMode({
 			static_cast<uint32_t>(static_cast<float>(resolution.getWidth()) * renderingScale),
 			static_cast<uint32_t>(static_cast<float>(resolution.getHeight()) * renderingScale)
@@ -28,6 +30,8 @@ int main() {
 			.antiAliasingLevel = 8
 		}
 	};
+
+	sf::Font SFFont("C:\\Windows\\Fonts\\arial.ttf");
 
 	// -------------------------------- YOBA renderer & rendering target --------------------------------
 
@@ -69,31 +73,50 @@ int main() {
 	seven.setHorizontalAlignment(Alignment::center);
 	rows += &seven;
 
-	TextView descriptionText {};
-	Theme::applyDescription(&descriptionText);
-	descriptionText.setWrappingEnabled(true);
-	descriptionText.setText("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since 1966");
-	rows += &descriptionText;
+	TextView textView1 {};
+	Theme::applyDescription(&textView1);
+	textView1.setWrappingEnabled(true);
+	textView1.setText("Following their work on Rogue Trader, Owlcat Games developed a narrative-heavy RPG where players command an Imperial Inquisitor");
+	textView1.setTextAlignment(Alignment::center);
+	rows += &textView1;
 
-	Button button {};
-	Theme::applyPrimary(&button);
-	button.setText("PULL UP");
+	Button button1 {};
+	Theme::applyPrimary(&button1);
+	button1.setText("Preorder");
 
-	button.setOnClick([&seven] {
+	button1.setOnClick([&seven] {
 		seven.setValue(seven.getValue() + 1);
 	});
 
-	rows += &button;
+	rows += &button1;
+
+	Divider divider1 {};
+	Theme::apply(&divider1);
+	rows += &divider1;
 
 	TextField textField {};
 	Theme::apply(&textField);
 	textField.setPlaceholder("Type something");
 	rows += &textField;
 
-	Slider slider {};
-	Theme::apply(&slider);
-	slider.setValue(0.5f);
-	rows += &slider;
+	TextView marginSliderTitle {};
+	Theme::applyTitle(&marginSliderTitle);
+	marginSliderTitle.setText("Margin");
+	rows += &marginSliderTitle;
+
+	Slider marginSlider {};
+	Theme::apply(&marginSlider);
+	marginSlider.setMinimumValue(0);
+	marginSlider.setMaximumValue(50);
+	marginSlider.setValue(rows.getMargin().getLeft());
+
+	marginSlider.setOnValueChanged([&] {
+		rows.setMargin({ static_cast<uint16_t>(marginSlider.getValue()) });
+	});
+
+	marginSlider.setTickLabelBuilder(Slider::int32TickLabelBuilder);
+
+	rows += &marginSlider;
 
 	ProgressBar progressBar {};
 	Theme::apply(&progressBar);
@@ -122,20 +145,56 @@ int main() {
 	imagesRow.setGap(10);
 	rows += &imagesRow;
 
-	SelectedAirspeedImage image1 {};
-	ImageView imageView1 {};
-	imageView1.setImage(&image1);
-	imagesRow += &imageView1;
+	WrapLayout imagesWrapLayout {};
+	imagesWrapLayout.setGap(10);
+	rows += &imagesWrapLayout;
 
-	NavDisplayImage image2 {};
-	ImageView imageView2 {};
-	imageView2.setImage(&image2);
-	imagesRow += &imageView2;
+	std::array<const Image*, 29> _images {
+		&Images::menuIconADIRS,
+		&Images::menuIconAutopilotSettings,
+		&Images::menuIconAxes,
+		&Images::menuIconDev,
+		&Images::menuIconFlightPlan,
+		&Images::menuIconMFD,
+		&Images::menuIconMFDAutopilot,
+		&Images::menuIconMFDAutopilotEngage,
+		&Images::menuIconMFDAutopilotFlightDirector,
+		&Images::menuIconMFDAutopilotGyro,
+		&Images::menuIconMFDBaro,
+		&Images::menuIconMFDCamera,
+		&Images::menuIconMFDCameraReset,
+		&Images::menuIconMFDLights,
+		&Images::menuIconMFDLightsCabin,
+		&Images::menuIconMFDLightsLanding,
+		&Images::menuIconMFDLightsNavigation,
+		&Images::menuIconMFDLightsStrobe,
+		&Images::menuIconMFDMetricUnits,
+		&Images::menuIconMFDND,
+		&Images::menuIconMFDPFD,
+		&Images::menuIconMFDTrim,
+		&Images::menuIconMotors,
+		&Images::menuIconPersonalization,
+		&Images::menuIconPower,
+		&Images::menuIconSpectrumScan,
+		&Images::menuIconTransceiver,
+		&Images::menuIconWaypoints,
+		&Images::menuIconWiFi
+	};
+
+	for (auto image : _images) {
+		auto imageView = new ImageView {};
+		imageView->setImage(image);
+		imagesWrapLayout += imageView;
+	}
+
+	auto a = new Control();
+	a->setHeight(450);
+	imagesWrapLayout += a;
 
 	// -------------------------------- Main loop with SFML event handling --------------------------------
 
-	while (window.isOpen()) {
-		while (const auto event = window.pollEvent()) {
+	while (SFWindow.isOpen()) {
+		while (const auto event = SFWindow.pollEvent()) {
 			if (event->is<sf::Event::MouseButtonPressed>()) {
 				const auto mouseEvent = event->getIf<sf::Event::MouseButtonPressed>();
 
@@ -179,24 +238,47 @@ int main() {
 			else if (event->is<sf::Event::Resized>()) {
 				auto resizedEvent = event->getIf<sf::Event::Resized>();
 
-				auto view = window.getView();
+				auto view = SFWindow.getView();
 				view.setSize(sf::Vector2f(resizedEvent->size));
 				view.setCenter(view.getSize() / 2.f);
-				window.setView(view);
+				SFWindow.setView(view);
 			}
 			else if (event->is<sf::Event::Closed>()) {
-				window.close();
+				SFWindow.close();
 			}
 		}
 
-		// -------------------------------- UI tick handling & rendering --------------------------------
+		// -------------------------------- YOBA UI tick handling & rendering --------------------------------
+
+		auto FPSStart = std::chrono::steady_clock::now();
 
 		application.invalidateRender();
 		application.tick();
 		application.render();
 
-		window.clear(sf::Color::Black);
-		window.draw(renderingTarget.getSprite());
-		window.display();
+		auto FPSElapsed = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - FPSStart);
+
+		// -------------------------------- SFML rendering  --------------------------------
+
+		// Rendering FPS counter
+		SFWindow.clear(sf::Color::Black);
+		SFWindow.draw(renderingTarget.getSprite());
+
+		char FPSText[32];
+		std::snprintf(FPSText, sizeof(FPSText), "%lld", 1'000'000 / FPSElapsed.count());
+
+		sf::Text text {
+			SFFont,
+			FPSText,
+			30
+		};
+
+		text.setPosition({ 10, 10 });
+		text.setStyle(sf::Text::Bold);
+		text.setFillColor(sf::Color::Magenta);
+		SFWindow.draw(text);
+
+		// Showing all changes in window
+		SFWindow.display();
 	}
 }

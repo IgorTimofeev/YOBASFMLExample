@@ -190,4 +190,10 @@ namespace pizda {
 
 		textField->setFont(&Theme::fontNormal);
 	}
+
+	void Theme::apply(Divider* divider) {
+		divider->setOrientation(Orientation::horizontal);
+		divider->setHeight(5);
+		divider->setFillColor(&Theme::bg4);
+	}
 }

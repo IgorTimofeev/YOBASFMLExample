@@ -8,9 +8,9 @@
 namespace pizda {
 	using namespace YOBA;
 
-	class SelectedAirspeedImage : public Image {
+	class MenuIconAutopilotSettingsImage : public Image {
 		public:
-			constexpr SelectedAirspeedImage() : Image(
+			constexpr MenuIconAutopilotSettingsImage() : Image(
 				ColorModel::RGB888,
 				ImageOptions::none,
 				Size(45, 33),
