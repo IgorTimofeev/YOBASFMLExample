@@ -9,7 +9,6 @@
 
 #include "Resources/Images.hpp"
 #include "Theme.hpp"
-#include <YOBA/UI/MarginLayout.hpp>
 
 int main() {
 	using namespace YOBA;
@@ -308,10 +307,6 @@ int main() {
 		progressAnimation.start();
 	});
 
-	auto spacer = new Control();
-	spacer->setHeight(450);
-	rows += spacer;
-
 	// -------------------------------- Main loop with SFML event handling --------------------------------
 
 	while (SFWindow.isOpen()) {
@@ -373,7 +368,7 @@ int main() {
 
 		const auto FPSMeasurementStart = std::chrono::steady_clock::now();
 
-		application.invalidateRender();
+		application.invalidate();
 		application.tick();
 		application.render();
 
