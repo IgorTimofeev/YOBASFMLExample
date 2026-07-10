@@ -196,4 +196,15 @@ namespace pizda {
 		divider->setHeight(5);
 		divider->setFillColor(&Theme::bg4);
 	}
+
+	void Theme::apply(Badge* badge) {
+		badge->setHeight(14);
+		badge->setCornerRadius(badge->getSize().getHeight() / 2);
+		badge->setTextMargin(Margin(5, 0, 5, 0));
+
+		badge->setFillColor(&Theme::bad1);
+		badge->setTextColor(&Theme::fg1);
+
+		badge->setFont(&Theme::fontSmall);
+	}
 }

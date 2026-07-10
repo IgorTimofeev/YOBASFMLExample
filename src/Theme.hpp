@@ -3,8 +3,7 @@
 #include <YOBA/Core.hpp>
 #include <YOBA/UI.hpp>
 #include <YOBA/Resources/Fonts/PIXY10Font.hpp>
-
-// #include <YOBA/Resources/Fonts/Vaticanus8Font.hpp>
+#include <YOBA/Resources/Fonts/Vaticanus8Font.hpp>
 // #include <YOBA/Resources/Fonts/Unscii16Font.hpp>
 
 namespace pizda {
@@ -64,6 +63,7 @@ namespace pizda {
 			// -------------------------------- Fonts --------------------------------
 
 			constexpr static PIXY10Font fontNormal {};
+			constexpr static Vaticanus8Font fontSmall {};
 
 			// -------------------------------- UI elements --------------------------------
 
@@ -87,5 +87,6 @@ namespace pizda {
 			static void applyTitle(TextView* text);
 			static void applyDescription(TextView* text);
 			static void apply(Divider* divider);
+			static void apply(Badge* badge);
 	};
 }

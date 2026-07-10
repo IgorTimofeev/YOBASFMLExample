@@ -1,6 +1,7 @@
 
 #include <chrono>
 #include <string>
+#include <functional>
 
 #include <YOBA/Core.hpp>
 #include <YOBA/Rendering.hpp>
@@ -45,6 +46,7 @@ int main() {
 
 	Theme::setup();
 
+
 	Application application {};
 	application.setRenderer(&renderer);
 	application.setBackgroundColor(&Theme::bg1);
@@ -58,11 +60,48 @@ int main() {
 	rows.setMargin({ 15 });
 	scrollView += &rows;
 
-	TextView titleTextView {};
-	Theme::applyPageTitle(&titleTextView);
-	titleTextView.setHorizontalAlignment(Alignment::center);
-	titleTextView.setText("Heresy counter");
-	rows += &titleTextView;
+	const auto addTitle1 = [&rows](const std::string_view text) -> TextView* {
+		const auto textView = new TextView {};
+		Theme::applyPageTitle(textView);
+		textView->setText(text);
+
+		rows += textView;
+
+		return textView;
+	};
+
+	const auto addTitle2 = [&rows](const std::string_view text) -> TextView* {
+		const auto textView = new TextView {};
+		Theme::applyTitle(textView);
+		textView->setMargin(Margin(0, 0, 0, -10));
+		textView->setText(text);
+
+		rows += textView;
+
+		return textView;
+	};
+
+	const auto addDivider = [&rows]() -> Divider* {
+		const auto divider1 = new Divider {};
+		Theme::apply(divider1);
+
+		rows += divider1;
+
+		return divider1;
+	};
+
+	const auto addButton = [&rows](const std::string_view text, const std::function<void()>& onClick) -> Button* {
+		const auto button = new Button {};
+		Theme::applyPrimary(button);
+		button->setText(text);
+		button->setOnClick(onClick);
+
+		rows += button;
+
+		return button;
+	};
+
+	addTitle1("Heresy counter")->setHorizontalAlignment(Alignment::center);
 
 	SevenSegment seven {};
 	seven.setActiveColor(&Theme::fg1);
@@ -80,116 +119,187 @@ int main() {
 	textView1.setTextAlignment(Alignment::center);
 	rows += &textView1;
 
-	Button button1 {};
-	Theme::applyPrimary(&button1);
-	button1.setText("Preorder");
-
-	button1.setOnClick([&seven] {
+	addButton("Preorder", [&seven] {
 		seven.setValue(seven.getValue() + 1);
 	});
 
-	rows += &button1;
+	// -------------------------------- Badges --------------------------------
 
-	Divider divider1 {};
-	Theme::apply(&divider1);
-	rows += &divider1;
+	addDivider();
+	addTitle1("Badges");
 
-	TextField textField {};
-	Theme::apply(&textField);
-	textField.setPlaceholder("Type something");
-	rows += &textField;
+	RelativeStackLayout badgesStackLayout {
+		Orientation::horizontal,
+		10
+	};
 
-	TextView marginSliderTitle {};
-	Theme::applyTitle(&marginSliderTitle);
-	marginSliderTitle.setText("Margin");
-	rows += &marginSliderTitle;
+	rows += &badgesStackLayout;
 
-	Slider marginSlider {};
-	Theme::apply(&marginSlider);
-	marginSlider.setMinimumValue(0);
-	marginSlider.setMaximumValue(50);
-	marginSlider.setValue(rows.getMargin().getLeft());
+	const auto addImageWithBadge = [&badgesStackLayout](const Image* image, const std::string_view badgeText) {
+		const auto imageAndBadgeLayout = new Layout {};
+		imageAndBadgeLayout->setHorizontalAlignment(Alignment::start);
+		badgesStackLayout += imageAndBadgeLayout;
 
-	marginSlider.setOnValueChanged([&] {
-		rows.setMargin({ static_cast<uint16_t>(marginSlider.getValue()) });
+		const auto imageView = new ImageView { image };
+		*imageAndBadgeLayout += imageView;
+
+		const auto badge = new Badge {};
+		Theme::apply(badge);
+		badge->setMargin(Margin(0, -3, -3, 0));
+		badge->setAlignment(Alignment::end, Alignment::start);
+		badge->setText(badgeText);
+		*imageAndBadgeLayout += badge;
+	};
+
+	addImageWithBadge(&Images::menuIconDev, "1");
+	addImageWithBadge(&Images::menuIconMFD, "2");
+	addImageWithBadge(&Images::menuIconMFDAutopilot, "3");
+	addImageWithBadge(&Images::menuIconPersonalization, "4");
+
+	// -------------------------------- Switches --------------------------------
+
+	addDivider();
+	addTitle1("Switches");
+
+	const auto addTextAndSwitch = [&rows](const std::string_view text, const Color* switchColor, const bool isActive) -> Switch* {
+		const auto textAndSwitchLayout = new RelativeStackLayout {
+			Orientation::horizontal,
+			10
+		};
+
+		rows += textAndSwitchLayout;
+
+		const auto textView = new TextView {};
+		Theme::applyDescription(textView);
+		textView->setVerticalAlignment(Alignment::center);
+		textView->setText(text);
+		*textAndSwitchLayout += textView;
+
+		const auto sw = new Switch {};
+		Theme::apply(sw);
+		sw->setVerticalAlignment(Alignment::center);
+		sw->setCheckedColor(switchColor);
+		sw->setActive(isActive);
+		textAndSwitchLayout->setAutoSize(sw);
+		*textAndSwitchLayout += sw;
+
+		return sw;
+	};
+
+	addTextAndSwitch("Dark theme", &Theme::accent1, true);
+	addTextAndSwitch("Large penis", &Theme::sky1, true);
+
+	// -------------------------------- Sliders --------------------------------
+
+	addDivider();
+	const auto slidersTitle = addTitle1("Sliders");
+
+	const auto addSlider = [&rows]() -> Slider* {
+		const auto slider = new Slider {};
+
+		Theme::apply(slider);
+		slider->setTickLabelBuilder(Slider::int32TickLabelBuilder);
+
+		rows += slider;
+
+		return slider;
+	};
+
+	addTitle2("Page padding");
+
+	const auto pagePaddingSlider = addSlider();
+	pagePaddingSlider->setMinimumValue(0);
+	pagePaddingSlider->setMaximumValue(50);
+	pagePaddingSlider->setValue(rows.getMargin().getLeft());
+
+	pagePaddingSlider->setOnValueChanged([&rows, pagePaddingSlider] {
+		rows.setMargin({
+			static_cast<uint16_t>(pagePaddingSlider->getValue())
+		});
 	});
 
-	marginSlider.setTickLabelBuilder(Slider::int32TickLabelBuilder);
+	addTitle2("Title scale");
 
-	rows += &marginSlider;
+	const auto titleScaleSlider = addSlider();
+	titleScaleSlider->setFillColor(&Theme::sky1);
+	titleScaleSlider->setMinimumValue(1);
+	titleScaleSlider->setMaximumValue(10);
+	titleScaleSlider->setValue(slidersTitle->getFontScale());
+
+	titleScaleSlider->setOnValueChanged([&slidersTitle, titleScaleSlider] {
+		slidersTitle->setFontScale(static_cast<uint8_t>(titleScaleSlider->getValue()));
+	});
+
+	// -------------------------------- Text fields --------------------------------
+
+
+	addDivider();
+	addTitle1("Text fields");
+
+	addTitle2("Regular");
+
+	TextField textField1 {};
+	Theme::apply(&textField1);
+	textField1.setPlaceholder("Abc");
+	rows += &textField1;
+
+	addTitle2("Numeric");
+
+	TextField textField2 {};
+	Theme::apply(&textField2);
+	textField2.setPlaceholder("123");
+	textField2.setKeyboardLayoutOptions(KeyboardLayoutOptions::numeric | KeyboardLayoutOptions::allowSigned);
+	rows += &textField2;
+
+	// -------------------------------- Animations --------------------------------
+
+	addDivider();
+	addTitle1("Animations");
 
 	ProgressBar progressBar {};
 	Theme::apply(&progressBar);
-	progressBar.setFillColor(&Theme::sky1);
-	progressBar.setValue(0.75f);
+	progressBar.setValue(0);
 	rows += &progressBar;
 
-	RelativeStackLayout switchRow {};
-	switchRow.setOrientation(Orientation::horizontal);
-	rows += &switchRow;
+	TextView progressText {};
+	Theme::applyDescription(&progressText);
+	progressText.setAlignment(Alignment::center);
+	rows += &progressText;
 
-	TextView switchRowText {};
-	Theme::apply(&switchRowText);
-	switchRowText.setVerticalAlignment(Alignment::center);
-	switchRowText.setText("Razyob mode");
-	switchRow += &switchRowText;
+	const auto updateProgressText = [&progressText, &progressBar] {
+		char textBuffer[32];
 
-	Switch switchRowSw {};
-	Theme::apply(&switchRowSw);
-	switchRowSw.setVerticalAlignment(Alignment::center);
-	switchRow += &switchRowSw;
-	switchRow.setAutoSize(&switchRowSw);
+		std::snprintf(
+			textBuffer,
+			sizeof(textBuffer),
+			"Casino depo pumped out at %d%%",
+			static_cast<uint8_t>(progressBar.getValue() * 100)
+		);
 
-	StackLayout imagesRow {};
-	imagesRow.setOrientation(Orientation::horizontal);
-	imagesRow.setGap(10);
-	rows += &imagesRow;
-
-	WrapLayout imagesWrapLayout {};
-	imagesWrapLayout.setGap(10);
-	rows += &imagesWrapLayout;
-
-	std::array<const Image*, 29> _images {
-		&Images::menuIconADIRS,
-		&Images::menuIconAutopilotSettings,
-		&Images::menuIconAxes,
-		&Images::menuIconDev,
-		&Images::menuIconFlightPlan,
-		&Images::menuIconMFD,
-		&Images::menuIconMFDAutopilot,
-		&Images::menuIconMFDAutopilotEngage,
-		&Images::menuIconMFDAutopilotFlightDirector,
-		&Images::menuIconMFDAutopilotGyro,
-		&Images::menuIconMFDBaro,
-		&Images::menuIconMFDCamera,
-		&Images::menuIconMFDCameraReset,
-		&Images::menuIconMFDLights,
-		&Images::menuIconMFDLightsCabin,
-		&Images::menuIconMFDLightsLanding,
-		&Images::menuIconMFDLightsNavigation,
-		&Images::menuIconMFDLightsStrobe,
-		&Images::menuIconMFDMetricUnits,
-		&Images::menuIconMFDND,
-		&Images::menuIconMFDPFD,
-		&Images::menuIconMFDTrim,
-		&Images::menuIconMotors,
-		&Images::menuIconPersonalization,
-		&Images::menuIconPower,
-		&Images::menuIconSpectrumScan,
-		&Images::menuIconTransceiver,
-		&Images::menuIconWaypoints,
-		&Images::menuIconWiFi
+		progressText.setText(textBuffer);
 	};
 
-	for (auto image : _images) {
-		auto imageView = new ImageView {};
-		imageView->setImage(image);
-		imagesWrapLayout += imageView;
-	}
+	updateProgressText();
 
-	auto a = new Control();
-	a->setHeight(450);
-	rows += a;
+	FloatAnimation progressAnimation {};
+	progressAnimation.setFrom(0);
+	progressAnimation.setTo(1);
+	progressAnimation.setDuration(3'000'000);
+
+	progressAnimation.setOnTick([&progressBar, &progressAnimation, &updateProgressText] {
+		progressBar.setValue(progressAnimation.getProgress());
+
+		updateProgressText();
+	});
+
+	addButton("Hack", [&progressAnimation] {
+		progressAnimation.stop();
+		progressAnimation.start();
+	});
+
+	auto spacer = new Control();
+	spacer->setHeight(450);
+	rows += spacer;
 
 	// -------------------------------- Main loop with SFML event handling --------------------------------
 
