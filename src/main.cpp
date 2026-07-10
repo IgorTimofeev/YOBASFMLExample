@@ -189,7 +189,7 @@ int main() {
 
 	auto a = new Control();
 	a->setHeight(450);
-	imagesWrapLayout += a;
+	rows += a;
 
 	// -------------------------------- Main loop with SFML event handling --------------------------------
 
@@ -248,15 +248,17 @@ int main() {
 			}
 		}
 
-		// -------------------------------- YOBA UI tick handling & rendering --------------------------------
+		// -------------------------------- YOBA tick handling & rendering --------------------------------
 
-		auto FPSStart = std::chrono::steady_clock::now();
+		const auto FPSMeasurementStart = std::chrono::steady_clock::now();
 
 		application.invalidateRender();
 		application.tick();
 		application.render();
 
-		auto FPSElapsed = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - FPSStart);
+		const auto FPSMeasurementDurationUs =
+			std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - FPSMeasurementStart)
+			.count();
 
 		// -------------------------------- SFML rendering  --------------------------------
 
@@ -264,19 +266,19 @@ int main() {
 		SFWindow.clear(sf::Color::Black);
 		SFWindow.draw(renderingTarget.getSprite());
 
-		char FPSText[32];
-		std::snprintf(FPSText, sizeof(FPSText), "%lld", 1'000'000 / FPSElapsed.count());
+		char FPSTextBuffer[32];
+		std::snprintf(FPSTextBuffer, sizeof(FPSTextBuffer), "%lld FPS", 1'000'000 / FPSMeasurementDurationUs);
 
-		sf::Text text {
+		sf::Text FPSText {
 			SFFont,
-			FPSText,
-			30
+			FPSTextBuffer,
+			15
 		};
 
-		text.setPosition({ 10, 10 });
-		text.setStyle(sf::Text::Bold);
-		text.setFillColor(sf::Color::Magenta);
-		SFWindow.draw(text);
+		FPSText.setPosition({ 10, 10 });
+		FPSText.setStyle(sf::Text::Bold);
+		FPSText.setFillColor(sf::Color::Magenta);
+		SFWindow.draw(FPSText);
 
 		// Showing all changes in window
 		SFWindow.display();
