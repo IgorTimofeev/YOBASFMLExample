@@ -170,7 +170,7 @@ namespace pizda {
 		text->setFontScale(2);
 	}
 
-	void Theme::applyTitle(TextView* text) {
+	void Theme::applyElementTitle(TextView* text) {
 		text->setFont(&Theme::fontNormal);
 		text->setTextColor(&Theme::fg3);
 	}
@@ -218,9 +218,11 @@ namespace pizda {
 		button->setHeight(elementHeight);
 		button->setCornerRadius(cornerRadius);
 
+		button->setDefaultBackgroundColor(nullptr);
 		button->setDefaultBorderColor(&Theme::fg5);
 		button->setDefaultTextColor(&Theme::fg5);
 
+		button->setActiveBackgroundColor(nullptr);
 		button->setActiveBorderColor(&Theme::fg1);
 		button->setActiveTextColor(&Theme::fg1);
 

@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Main
-file(GLOB_RECURSE MAIN_SOURCES "src/*.cpp")
+file(GLOB_RECURSE MAIN_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 add_executable(main ${MAIN_SOURCES})
 target_compile_features(main PRIVATE cxx_std_23)
 

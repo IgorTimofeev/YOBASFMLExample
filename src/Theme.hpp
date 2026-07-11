@@ -85,7 +85,7 @@ namespace pizda {
 			static void apply(ProgressBar* progressBar);
 			static void apply(TextView* text);
 			static void applyPageTitle(TextView* text);
-			static void applyTitle(TextView* text);
+			static void applyElementTitle(TextView* text);
 			static void applyDescription(TextView* text);
 			static void apply(Divider* divider);
 			static void apply(Badge* badge);

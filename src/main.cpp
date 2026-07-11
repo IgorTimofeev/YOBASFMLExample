@@ -32,6 +32,8 @@ int main() {
 		}
 	};
 
+	SFWindow.setFramerateLimit(60);
+
 	sf::Font SFFont("C:\\Windows\\Fonts\\arial.ttf");
 
 	// -------------------------------- YOBA renderer & rendering target --------------------------------
@@ -54,14 +56,14 @@ int main() {
 	Theme::apply(&scrollView);
 	application += &scrollView;
 
-	MarginLayout rowsMarginLayout {{ 15 }};
-	scrollView += &rowsMarginLayout;
-
 	StackLayout rows {};
 	rows.setGap(10);
-	rowsMarginLayout += &rows;
+	scrollView += &rows;
 
-	const auto addTitle1 = [&rows](const std::string_view text) -> TextView* {
+	MarginTransform rowsTransform {{ 15 }};
+	rows.setLayoutTransform(&rowsTransform);
+
+	const auto addPageTitle = [&rows](const std::string_view text) -> TextView* {
 		const auto textView = new TextView {};
 		Theme::applyPageTitle(textView);
 		textView->setText(text);
@@ -71,16 +73,19 @@ int main() {
 		return textView;
 	};
 
-	const auto addTitle2 = [&rows](const std::string_view text) -> TextView* {
-		const auto marginLayout = new MarginLayout {{ 0, 0, 0, -5 }};
-		rows += marginLayout;
+	const auto addElementTitle = [&rows](const std::string_view titleText, Element* element) -> void {
+		const auto titleAndElementLayout = new StackLayout {
+			4
+		};
 
 		const auto textView = new TextView {};
-		Theme::applyTitle(textView);
-		textView->setText(text);
-		*marginLayout += textView;
+		Theme::applyElementTitle(textView);
+		textView->setText(titleText);
+		*titleAndElementLayout += textView;
 
-		return textView;
+		*titleAndElementLayout += element;
+
+		rows += titleAndElementLayout;
 	};
 
 	const auto addDivider = [&rows]() -> Divider* {
@@ -92,18 +97,17 @@ int main() {
 		return divider1;
 	};
 
-	const auto addButton = [&rows](const std::string_view text, const std::function<void()>& onClick) -> Button* {
+	const auto addButton = [&rows](const std::string_view text) -> Button* {
 		const auto button = new Button {};
 		Theme::applyPrimary(button);
 		button->setText(text);
-		button->setOnClick(onClick);
 
 		rows += button;
 
 		return button;
 	};
 
-	addTitle1("Heresy counter")->setHorizontalAlignment(Alignment::center);
+	addPageTitle("Heresy counter")->setHorizontalAlignment(Alignment::center);
 
 	SevenSegment seven {};
 	seven.setActiveColor(&Theme::fg1);
@@ -121,14 +125,14 @@ int main() {
 	textView1.setTextAlignment(Alignment::center);
 	rows += &textView1;
 
-	addButton("Preorder", [&seven] {
+	addButton("Preorder")->setOnClick([&seven] {
 		seven.setValue(seven.getValue() + 1);
 	});
 
 	// -------------------------------- Badges --------------------------------
 
 	addDivider();
-	addTitle1("Badges");
+	addPageTitle("Badges");
 
 	RelativeStackLayout badgesStackLayout {
 		Orientation::horizontal,
@@ -145,14 +149,14 @@ int main() {
 		const auto imageView = new ImageView { image };
 		*imageAndBadgeLayout += imageView;
 
-		const auto marginLayout = new MarginLayout {{ 0, -3, -3, 0 }};
-		*imageAndBadgeLayout += marginLayout;
-
 		const auto badge = new Badge {};
 		Theme::apply(badge);
 		badge->setAlignment(Alignment::end, Alignment::start);
 		badge->setText(badgeText);
-		*marginLayout += badge;
+		*imageAndBadgeLayout += badge;
+
+		const auto transform = new TranslateTransform {{ 5, -5 }};
+		badge->setRenderingTransform(transform);
 	};
 
 	addImageWithBadge(&Images::menuIconDev, "1");
@@ -163,7 +167,7 @@ int main() {
 	// -------------------------------- Switches --------------------------------
 
 	addDivider();
-	addTitle1("Switches");
+	addPageTitle("Switches");
 
 	const auto addTextAndSwitch = [&rows](const std::string_view text, const Color* switchColor, const bool isActive) -> Switch* {
 		const auto textAndSwitchLayout = new RelativeStackLayout {
@@ -201,35 +205,32 @@ int main() {
 	// -------------------------------- Sliders --------------------------------
 
 	addDivider();
-	const auto slidersTitle = addTitle1("Sliders");
+	const auto slidersTitle = addPageTitle("Sliders");
 
-	const auto addSlider = [&rows]() -> Slider* {
+	const auto newSlider = [&rows]() -> Slider* {
 		const auto slider = new Slider {};
 
 		Theme::apply(slider);
 		slider->setTickLabelBuilder(Slider::int32TickLabelBuilder);
 
-		rows += slider;
-
 		return slider;
 	};
 
-	addTitle2("Page padding");
 
-	const auto pagePaddingSlider = addSlider();
+	const auto pagePaddingSlider = newSlider();
 	pagePaddingSlider->setMinimumValue(0);
 	pagePaddingSlider->setMaximumValue(50);
-	pagePaddingSlider->setValue(rowsMarginLayout.getMargin().getLeft());
+	pagePaddingSlider->setValue(rowsTransform.getMargin().getLeft());
 
-	pagePaddingSlider->setOnValueChanged([&rowsMarginLayout, pagePaddingSlider] {
-		rowsMarginLayout.setMargin({
+	pagePaddingSlider->setOnValueChanged([&rowsTransform, pagePaddingSlider] {
+		rowsTransform.setMargin({
 			static_cast<uint16_t>(pagePaddingSlider->getValue())
 		});
 	});
 
-	addTitle2("Title scale");
+	addElementTitle("Page padding", pagePaddingSlider);
 
-	const auto titleScaleSlider = addSlider();
+	const auto titleScaleSlider = newSlider();
 	titleScaleSlider->setFillColor(&Theme::sky1);
 	titleScaleSlider->setMinimumValue(1);
 	titleScaleSlider->setMaximumValue(10);
@@ -239,31 +240,31 @@ int main() {
 		slidersTitle->setFontScale(static_cast<uint8_t>(titleScaleSlider->getValue()));
 	});
 
+	addElementTitle("Title scale", titleScaleSlider);
+
 	// -------------------------------- Text fields --------------------------------
 
 
 	addDivider();
-	addTitle1("Text fields");
-
-	addTitle2("Regular");
+	addPageTitle("Text fields");
 
 	TextField textField1 {};
 	Theme::apply(&textField1);
 	textField1.setPlaceholder("Abc");
-	rows += &textField1;
 
-	addTitle2("Numeric");
+	addElementTitle("Regular", &textField1);
 
 	TextField textField2 {};
 	Theme::apply(&textField2);
 	textField2.setPlaceholder("123");
 	textField2.setKeyboardLayoutOptions(KeyboardLayoutOptions::numeric | KeyboardLayoutOptions::allowSigned);
-	rows += &textField2;
+
+	addElementTitle("Numeric", &textField2);
 
 	// -------------------------------- Animations --------------------------------
 
 	addDivider();
-	addTitle1("Animations");
+	addPageTitle("Animations");
 
 	ProgressBar progressBar {};
 	Theme::apply(&progressBar);
@@ -282,7 +283,7 @@ int main() {
 		std::snprintf(
 			textBuffer,
 			sizeof(textBuffer),
-			"Casino depo pumped out at %d%%",
+			"Casino pumped out by %d%%",
 			static_cast<uint8_t>(progressBar.getValue() * 100)
 		);
 
@@ -302,7 +303,27 @@ int main() {
 		updateProgressText();
 	});
 
-	addButton("Hack", [&progressAnimation] {
+	ScaleTransform scaleButtonTransform {};
+
+	auto scaleButton = addButton("Toggle me");
+	Theme::applyPlaceholder(scaleButton);
+	scaleButton->setRenderingTransform(&scaleButtonTransform);
+	scaleButton->setToggle(true);
+
+	ScaleTransformAnimation scaleButtonAnimation {};
+	scaleButtonAnimation.setTarget(scaleButton);
+	scaleButtonAnimation.setTransform(&scaleButtonTransform);
+	scaleButtonAnimation.setDuration(250'000);
+
+	scaleButton->setOnClick([&scaleButtonAnimation, &scaleButton, &scaleButtonTransform] {
+		scaleButtonAnimation.stop();
+
+		scaleButtonAnimation.setFrom(scaleButtonTransform.getScale());
+		scaleButtonAnimation.setTo(scaleButton->isActive() ? Vector2F(0.9f) : Vector2F(1, 1));
+		scaleButtonAnimation.start();
+	});
+
+	addButton("Hack")->setOnClick([&progressAnimation] {
 		progressAnimation.stop();
 		progressAnimation.start();
 	});
@@ -350,6 +371,19 @@ int main() {
 				};
 
 				application.pushEvent(&pointerDragEvent);
+			}
+			else if (event->is<sf::Event::MouseWheelScrolled>()) {
+				const auto mouseWheelScrolledEvent = event->getIf<sf::Event::MouseWheelScrolled>();
+
+				MouseWheelEvent mouseWheelEvent {
+					Point(
+						static_cast<int32_t>(static_cast<float>(mouseWheelScrolledEvent->position.x) / renderingTarget.getRenderingScale()),
+						static_cast<int32_t>(static_cast<float>(mouseWheelScrolledEvent->position.y) / renderingTarget.getRenderingScale())
+					),
+					static_cast<int32_t>(mouseWheelScrolledEvent->delta) * 20
+				};
+
+				application.pushEvent(&mouseWheelEvent);
 			}
 			else if (event->is<sf::Event::Resized>()) {
 				auto resizedEvent = event->getIf<sf::Event::Resized>();
