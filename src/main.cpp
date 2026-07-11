@@ -328,6 +328,8 @@ int main() {
 		progressAnimation.start();
 	});
 
+
+
 	// -------------------------------- Main loop with SFML event handling --------------------------------
 
 	while (SFWindow.isOpen()) {
