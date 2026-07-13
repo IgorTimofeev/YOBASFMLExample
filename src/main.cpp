@@ -16,19 +16,19 @@ int main() {
 
 	// -------------------------------- SFML window --------------------------------
 
-	constexpr static float renderingScale = 2;
-	constexpr static Size resolution { 240, 320 };
+	constexpr static float virtualScreenRenderingScale = 2;
+	constexpr static Size virtualScreenResolution { 240, 320 };
 
 	sf::RenderWindow SFWindow {
 		sf::VideoMode({
-			static_cast<uint32_t>(static_cast<float>(resolution.getWidth()) * renderingScale),
-			static_cast<uint32_t>(static_cast<float>(resolution.getHeight()) * renderingScale)
+			static_cast<uint32_t>(static_cast<float>(virtualScreenResolution.getWidth()) * virtualScreenRenderingScale),
+			static_cast<uint32_t>(static_cast<float>(virtualScreenResolution.getHeight()) * virtualScreenRenderingScale)
 		}),
 		"YOBA | Desktop demo",
-		sf::Style::None | sf::Style::Titlebar | sf::Style::Close | sf::Style::Resize,
+		sf::Style::None | sf::Style::Titlebar | sf::Style::Close,
 		sf::State::Windowed,
 		sf::ContextSettings {
-			.antiAliasingLevel = 8
+			.antiAliasingLevel = 4
 		}
 	};
 
@@ -39,7 +39,7 @@ int main() {
 	// -------------------------------- YOBA renderer & rendering target --------------------------------
 
 	SFMLSpriteRenderingTarget renderingTarget {};
-	renderingTarget.setup(resolution, renderingScale);
+	renderingTarget.setup(virtualScreenResolution, virtualScreenRenderingScale);
 
 	RGB888BufferedRenderer renderer {};
 	renderer.setTarget(&renderingTarget);
@@ -121,7 +121,7 @@ int main() {
 	TextView textView1 {};
 	Theme::applyDescription(&textView1);
 	textView1.setWrappingEnabled(true);
-	textView1.setText("Following their work on Rogue Trader, Owlcat Games developed a narrative-heavy RPG where players command an Imperial Inquisitor");
+	textView1.setText("Following their work on Rogue Trader, Owlcat Games developed a narrative heavy RPG where players command an Imperial Inquisitor");
 	textView1.setTextAlignment(Alignment::center);
 	rows += &textView1;
 
@@ -164,44 +164,6 @@ int main() {
 	addImageWithBadge(&Images::menuIconMFDAutopilot, "3");
 	addImageWithBadge(&Images::menuIconPersonalization, "4");
 
-	// -------------------------------- Switches --------------------------------
-
-	addDivider();
-	addPageTitle("Switches");
-
-	const auto addTextAndSwitch = [&rows](const std::string_view text, const Color* switchColor, const bool isActive) -> Switch* {
-		const auto textAndSwitchLayout = new RelativeStackLayout {
-			Orientation::horizontal,
-			10
-		};
-
-		rows += textAndSwitchLayout;
-
-		const auto textView = new TextView {};
-		Theme::applyDescription(textView);
-		textView->setVerticalAlignment(Alignment::center);
-		textView->setText(text);
-		*textAndSwitchLayout += textView;
-
-		const auto sw = new Switch {};
-		Theme::apply(sw);
-		sw->setVerticalAlignment(Alignment::center);
-		sw->setCheckedColor(switchColor);
-		sw->setActive(isActive);
-		textAndSwitchLayout->setAutoSize(sw);
-		*textAndSwitchLayout += sw;
-
-		return sw;
-	};
-
-	const auto darkThemeSwitch = addTextAndSwitch("Dark theme", &Theme::accent1, true);
-
-	darkThemeSwitch->setOnIsActiveChanged([&darkThemeSwitch] {
-		Theme::setColorScheme(darkThemeSwitch->isActive());
-	});
-
-	addTextAndSwitch("Large penis", &Theme::sky1, true);
-
 	// -------------------------------- Sliders --------------------------------
 
 	addDivider();
@@ -242,8 +204,45 @@ int main() {
 
 	addElementTitle("Title scale", titleScaleSlider);
 
-	// -------------------------------- Text fields --------------------------------
+	// -------------------------------- Switches --------------------------------
 
+	addDivider();
+	addPageTitle("Switches");
+
+	const auto addTextAndSwitch = [&rows](const std::string_view text, const Color* switchColor, const bool isActive) -> Switch* {
+		const auto textAndSwitchLayout = new RelativeStackLayout {
+			Orientation::horizontal,
+			10
+		};
+
+		rows += textAndSwitchLayout;
+
+		const auto textView = new TextView {};
+		Theme::applyDescription(textView);
+		textView->setVerticalAlignment(Alignment::center);
+		textView->setText(text);
+		*textAndSwitchLayout += textView;
+
+		const auto sw = new Switch {};
+		Theme::apply(sw);
+		sw->setVerticalAlignment(Alignment::center);
+		sw->setCheckedColor(switchColor);
+		sw->setActive(isActive);
+		textAndSwitchLayout->setAutoSize(sw);
+		*textAndSwitchLayout += sw;
+
+		return sw;
+	};
+
+	const auto darkThemeSwitch = addTextAndSwitch("Dark theme", &Theme::accent1, true);
+
+	darkThemeSwitch->setOnIsActiveChanged([&darkThemeSwitch] {
+		Theme::setColorScheme(darkThemeSwitch->isActive());
+	});
+
+	addTextAndSwitch("Large penis", &Theme::sky1, true);
+
+	// -------------------------------- Text fields --------------------------------
 
 	addDivider();
 	addPageTitle("Text fields");
@@ -327,8 +326,6 @@ int main() {
 		progressAnimation.stop();
 		progressAnimation.start();
 	});
-
-
 
 	// -------------------------------- Main loop with SFML event handling --------------------------------
 
