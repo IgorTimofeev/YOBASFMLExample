@@ -74,14 +74,14 @@ int main() {
 		return textView;
 	};
 
-	const auto addElementTitle = [&rows](const std::string_view titleText, Element* element) -> TextView* {
+	const auto addElementWithTitle = [&rows](const std::string_view title, Element* element) -> TextView* {
 		const auto titleAndElementLayout = new StackLayout {
 			4
 		};
 
 		const auto textView = new TextView {};
 		Theme::applyElementTitle(textView);
-		textView->setText(titleText);
+		textView->setText(title);
 		*titleAndElementLayout += textView;
 
 		*titleAndElementLayout += element;
@@ -161,7 +161,7 @@ int main() {
 		});
 	});
 
-	addElementTitle("Page padding", pagePaddingSlider);
+	addElementWithTitle("Page padding", pagePaddingSlider);
 
 	const auto fontScaleSlider = newSlider();
 	fontScaleSlider->setFillColor(&Theme::magenta1);
@@ -177,7 +177,7 @@ int main() {
 		fontScaleSlider->setTickLabelFontScale(fontScale);
 	});
 
-	addElementTitle("Font scale", fontScaleSlider);
+	addElementWithTitle("Font scale", fontScaleSlider);
 
 	// -------------------------------- Badges --------------------------------
 
@@ -248,57 +248,18 @@ int main() {
 
 	addTextAndSwitch("Large penis", &Theme::sky1, true);
 
-	// -------------------------------- Sliders --------------------------------
+	// -------------------------------- Selectors --------------------------------
 
 	addDivider();
 	addPageTitle("Selectors");
 
-	RectangularShape selectorBackgroundRectangle {};
-	selectorBackgroundRectangle.setCornerRadius(Theme::cornerRadius);
-	selectorBackgroundRectangle.setFillColor(&Theme::bg3);
-
-	MarginTransform selectorItemsLayoutMarginTransform {{ 2 }};
-
-	RelativeStackLayout selectorItemsLayout { Orientation::horizontal, 2 };
-	selectorItemsLayout.setLayoutTransform(&selectorItemsLayoutMarginTransform);
-
+	// Creating selector
 	Selector selector {};
 	selector.setHeight(30);
-	selector += &selectorBackgroundRectangle;
-	selector += &selectorItemsLayout;
-	selector.setItemsLayout(&selectorItemsLayout);
-	const auto selectorTitle = addElementTitle("Text alignment", &selector);
 
-	const auto addSelectorItem = [&selector](const std::string_view text) {
-		const auto selectorItem = new SelectorItem();
+	const auto selectorTitle = addElementWithTitle("Text alignment", &selector);
 
-		const auto rectangle = new RectangularShape();
-		rectangle->setCornerRadius(Theme::cornerRadius);
-		rectangle->setFillColor(&Theme::fg1);
-		*selectorItem += rectangle;
-
-		const auto textView = new TextView();
-		textView->setAlignment(Alignment::center);
-		textView->setFont(&Theme::fontNormal);
-		textView->setText(text);
-		*selectorItem += textView;
-
-		const auto updateColors = [rectangle, selectorItem, textView] {
-			rectangle->setVisible(selectorItem->isActive());
-			textView->setTextColor(selectorItem->isActive() ? &Theme::bg1 : &Theme::fg1);
-		};
-
-		updateColors();
-
-		selectorItem->setOnIsActiveChanged(updateColors);
-
-		selector.addItem(selectorItem);
-	};
-
-	addSelectorItem("Left");
-	addSelectorItem("Center");
-	addSelectorItem("Right");
-
+	// Assigning callback that will be called on any item selected
 	selector.setOnSelectionChanged([&selector, selectorTitle] {
 		switch (selector.getSelectedIndex()) {
 			case 0: selectorTitle->setTextAlignment(Alignment::start); break;
@@ -307,6 +268,46 @@ int main() {
 		}
 	});
 
+	// Adding rectangle to fill out selector background behind its items
+	RectangularShape selectorBackgroundRectangle {};
+	selectorBackgroundRectangle.setCornerRadius(Theme::cornerRadius);
+	selectorBackgroundRectangle.setFillColor(&Theme::bg3);
+	selector += &selectorBackgroundRectangle;
+
+	// Adding item layout that will automatically stretch its children
+	RelativeStackLayout selectorItemLayout { Orientation::horizontal, 2 };
+	MarginTransform selectorItemsLayoutMarginTransform {{ 2 }};
+	selectorItemLayout.setLayoutTransform(&selectorItemsLayoutMarginTransform);
+	selector += &selectorItemLayout;
+	// Telling selector that it should use exactly this layout for... laying out its items
+	selector.setItemLayout(&selectorItemLayout);
+
+	// Creating custom SelectorItem that will be rendered as plain text
+	class MySelectorItem : public SelectorItem, public TextElement {
+		public:
+			MySelectorItem(const std::string_view text) {
+				setText(text);
+			}
+
+		protected:
+			void onRender(Renderer* renderer, const Rectangle& bounds) override {
+				renderer->fillRectangle(bounds, Theme::cornerRadius, isActive() ? &Theme::fg1 : &Theme::bg3);
+
+				renderer->putText(
+					bounds.getCenter() - Theme::fontNormal.getSize(getText()).getCenter(),
+					&Theme::fontNormal,
+					isActive() ? &Theme::bg1 : &Theme::fg1,
+					getText()
+				);
+			}
+	};
+
+	// Adding custom items to selector
+	selector.addItem(new MySelectorItem("Left"));
+	selector.addItem(new MySelectorItem("Center"));
+	selector.addItem(new MySelectorItem("Right"));
+
+	// Selecting first item in list
 	selector.setSelectedIndex(0);
 
 	// -------------------------------- Text fields --------------------------------
@@ -318,14 +319,14 @@ int main() {
 	Theme::apply(&textField1);
 	textField1.setPlaceholder("Abc");
 
-	addElementTitle("Regular", &textField1);
+	addElementWithTitle("Regular", &textField1);
 
 	TextField textField2 {};
 	Theme::apply(&textField2);
 	textField2.setPlaceholder("123");
 	textField2.setKeyboardLayoutOptions(KeyboardLayoutOptions::numeric | KeyboardLayoutOptions::allowSigned);
 
-	addElementTitle("Numeric", &textField2);
+	addElementWithTitle("Numeric", &textField2);
 
 	// -------------------------------- Animations --------------------------------
 
@@ -371,7 +372,12 @@ int main() {
 
 	ScaleTransform scaleButtonTransform {};
 
-	auto scaleButton = addButton("Toggle me");
+	addButton("Hack")->setOnClick([&progressAnimation] {
+		progressAnimation.stop();
+		progressAnimation.start();
+	});
+
+	auto scaleButton = addButton("Toggle scale");
 	Theme::applyPlaceholder(scaleButton);
 	scaleButton->setRenderingTransform(&scaleButtonTransform);
 	scaleButton->setToggle(true);
@@ -387,11 +393,6 @@ int main() {
 		scaleButtonAnimation.setFrom(scaleButtonTransform.getScale());
 		scaleButtonAnimation.setTo(scaleButton->isActive() ? Vector2F(0.9f) : Vector2F(1, 1));
 		scaleButtonAnimation.start();
-	});
-
-	addButton("Hack")->setOnClick([&progressAnimation] {
-		progressAnimation.stop();
-		progressAnimation.start();
 	});
 
 	// -------------------------------- Main loop with SFML event handling --------------------------------
