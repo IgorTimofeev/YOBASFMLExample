@@ -2,6 +2,7 @@
 #include <chrono>
 #include <string>
 #include <functional>
+#include <cmath>
 
 #include <YOBA/Core.hpp>
 #include <YOBA/Rendering.hpp>
@@ -73,7 +74,7 @@ int main() {
 		return textView;
 	};
 
-	const auto addElementTitle = [&rows](const std::string_view titleText, Element* element) -> void {
+	const auto addElementTitle = [&rows](const std::string_view titleText, Element* element) -> TextView* {
 		const auto titleAndElementLayout = new StackLayout {
 			4
 		};
@@ -86,6 +87,8 @@ int main() {
 		*titleAndElementLayout += element;
 
 		rows += titleAndElementLayout;
+
+		return textView;
 	};
 
 	const auto addDivider = [&rows]() -> Divider* {
@@ -107,6 +110,8 @@ int main() {
 		return button;
 	};
 
+	// -------------------------------- OWLCAT, GIVE ME $$$ --------------------------------
+
 	addPageTitle("Heresy counter")->setHorizontalAlignment(Alignment::center);
 
 	SevenSegment seven {};
@@ -118,33 +123,74 @@ int main() {
 	seven.setHorizontalAlignment(Alignment::center);
 	rows += &seven;
 
-	TextView textView1 {};
-	Theme::applyDescription(&textView1);
-	textView1.setWrappingEnabled(true);
-	textView1.setText("Following their work on Rogue Trader, Owlcat Games developed a narrative heavy RPG where players command an Imperial Inquisitor");
-	textView1.setTextAlignment(Alignment::center);
-	rows += &textView1;
+	TextView owlcatTextView {};
+	Theme::applyDescription(&owlcatTextView);
+	owlcatTextView.setWrappingEnabled(true);
+	owlcatTextView.setText("Following their work on Rogue Trader, Owlcat Games developed a narrative-heavy RPG where players command an Imperial Inquisitor");
+	// textView1.setText("Чета я сомневаюсь, что русский текст адекватно перенесется посимвольно-пиздато с тире в одном флаконе, но вообще как знать, это ж по идее просто байты");
+	owlcatTextView.setTextAlignment(Alignment::center);
+	rows += &owlcatTextView;
 
 	addButton("Preorder")->setOnClick([&seven] {
 		seven.setValue(seven.getValue() + 1);
 	});
+
+	// -------------------------------- Sliders --------------------------------
+
+	addDivider();
+	addPageTitle("Sliders");
+
+	const auto newSlider = []() -> Slider* {
+		const auto slider = new Slider {};
+
+		Theme::apply(slider);
+		slider->setTickLabelBuilder(Slider::int32TickLabelBuilder);
+
+		return slider;
+	};
+
+	const auto pagePaddingSlider = newSlider();
+	pagePaddingSlider->setFillColor(&Theme::sky1);
+	pagePaddingSlider->setMinimumValue(0);
+	pagePaddingSlider->setMaximumValue(50);
+	pagePaddingSlider->setValue(rowsTransform.getMargin().getLeft());
+
+	pagePaddingSlider->setOnValueChanged([&rowsTransform, pagePaddingSlider] {
+		rowsTransform.setMargin({
+			static_cast<uint16_t>(std::round(pagePaddingSlider->getValue()))
+		});
+	});
+
+	addElementTitle("Page padding", pagePaddingSlider);
+
+	const auto fontScaleSlider = newSlider();
+	fontScaleSlider->setFillColor(&Theme::magenta1);
+	fontScaleSlider->setTickCount(5);
+	fontScaleSlider->setMinimumValue(1);
+	fontScaleSlider->setMaximumValue(5);
+	fontScaleSlider->setValue(pagePaddingSlider->getTickLabelFontScale());
+
+	fontScaleSlider->setOnValueChanged([fontScaleSlider, pagePaddingSlider] {
+		const auto fontScale = static_cast<uint8_t>(std::round(fontScaleSlider->getValue()));
+
+		pagePaddingSlider->setTickLabelFontScale(fontScale);
+		fontScaleSlider->setTickLabelFontScale(fontScale);
+	});
+
+	addElementTitle("Font scale", fontScaleSlider);
 
 	// -------------------------------- Badges --------------------------------
 
 	addDivider();
 	addPageTitle("Badges");
 
-	RelativeStackLayout badgesStackLayout {
-		Orientation::horizontal,
-		10
-	};
+	WrapLayout badgesLayout { 10 };
+	rows += &badgesLayout;
 
-	rows += &badgesStackLayout;
-
-	const auto addImageWithBadge = [&badgesStackLayout](const Image* image, const std::string_view badgeText) {
+	const auto addImageWithBadge = [&badgesLayout](const Image* image, const std::string_view badgeText) {
 		const auto imageAndBadgeLayout = new Layout {};
 		imageAndBadgeLayout->setHorizontalAlignment(Alignment::start);
-		badgesStackLayout += imageAndBadgeLayout;
+		badgesLayout += imageAndBadgeLayout;
 
 		const auto imageView = new ImageView { image };
 		*imageAndBadgeLayout += imageView;
@@ -163,46 +209,6 @@ int main() {
 	addImageWithBadge(&Images::menuIconMFD, "2");
 	addImageWithBadge(&Images::menuIconMFDAutopilot, "3");
 	addImageWithBadge(&Images::menuIconPersonalization, "4");
-
-	// -------------------------------- Sliders --------------------------------
-
-	addDivider();
-	const auto slidersTitle = addPageTitle("Sliders");
-
-	const auto newSlider = [&rows]() -> Slider* {
-		const auto slider = new Slider {};
-
-		Theme::apply(slider);
-		slider->setTickLabelBuilder(Slider::int32TickLabelBuilder);
-
-		return slider;
-	};
-
-
-	const auto pagePaddingSlider = newSlider();
-	pagePaddingSlider->setMinimumValue(0);
-	pagePaddingSlider->setMaximumValue(50);
-	pagePaddingSlider->setValue(rowsTransform.getMargin().getLeft());
-
-	pagePaddingSlider->setOnValueChanged([&rowsTransform, pagePaddingSlider] {
-		rowsTransform.setMargin({
-			static_cast<uint16_t>(pagePaddingSlider->getValue())
-		});
-	});
-
-	addElementTitle("Page padding", pagePaddingSlider);
-
-	const auto titleScaleSlider = newSlider();
-	titleScaleSlider->setFillColor(&Theme::sky1);
-	titleScaleSlider->setMinimumValue(1);
-	titleScaleSlider->setMaximumValue(10);
-	titleScaleSlider->setValue(slidersTitle->getFontScale());
-
-	titleScaleSlider->setOnValueChanged([&slidersTitle, titleScaleSlider] {
-		slidersTitle->setFontScale(static_cast<uint8_t>(titleScaleSlider->getValue()));
-	});
-
-	addElementTitle("Title scale", titleScaleSlider);
 
 	// -------------------------------- Switches --------------------------------
 
@@ -226,7 +232,7 @@ int main() {
 		const auto sw = new Switch {};
 		Theme::apply(sw);
 		sw->setVerticalAlignment(Alignment::center);
-		sw->setCheckedColor(switchColor);
+		sw->setActiveColor(switchColor);
 		sw->setActive(isActive);
 		textAndSwitchLayout->setAutoSize(sw);
 		*textAndSwitchLayout += sw;
@@ -234,13 +240,74 @@ int main() {
 		return sw;
 	};
 
-	const auto darkThemeSwitch = addTextAndSwitch("Dark theme", &Theme::accent1, true);
+	const auto themeSwitch = addTextAndSwitch("Dark theme", &Theme::accent1, true);
 
-	darkThemeSwitch->setOnIsActiveChanged([&darkThemeSwitch] {
-		Theme::setColorScheme(darkThemeSwitch->isActive());
+	themeSwitch->setOnIsActiveChanged([&themeSwitch] {
+		Theme::setColorScheme(themeSwitch->isActive());
 	});
 
 	addTextAndSwitch("Large penis", &Theme::sky1, true);
+
+	// -------------------------------- Sliders --------------------------------
+
+	addDivider();
+	addPageTitle("Selectors");
+
+	RectangularShape selectorBackgroundRectangle {};
+	selectorBackgroundRectangle.setCornerRadius(Theme::cornerRadius);
+	selectorBackgroundRectangle.setFillColor(&Theme::bg3);
+
+	MarginTransform selectorItemsLayoutMarginTransform {{ 2 }};
+
+	RelativeStackLayout selectorItemsLayout { Orientation::horizontal, 2 };
+	selectorItemsLayout.setLayoutTransform(&selectorItemsLayoutMarginTransform);
+
+	Selector selector {};
+	selector.setHeight(30);
+	selector += &selectorBackgroundRectangle;
+	selector += &selectorItemsLayout;
+	selector.setItemsLayout(&selectorItemsLayout);
+	const auto selectorTitle = addElementTitle("Text alignment", &selector);
+
+	const auto addSelectorItem = [&selector](const std::string_view text) {
+		const auto selectorItem = new SelectorItem();
+
+		const auto rectangle = new RectangularShape();
+		rectangle->setCornerRadius(Theme::cornerRadius);
+		rectangle->setFillColor(&Theme::fg1);
+		*selectorItem += rectangle;
+
+		const auto textView = new TextView();
+		textView->setAlignment(Alignment::center);
+		textView->setFont(&Theme::fontNormal);
+		textView->setText(text);
+		*selectorItem += textView;
+
+		const auto updateColors = [rectangle, selectorItem, textView] {
+			rectangle->setVisible(selectorItem->isActive());
+			textView->setTextColor(selectorItem->isActive() ? &Theme::bg1 : &Theme::fg1);
+		};
+
+		updateColors();
+
+		selectorItem->setOnIsActiveChanged(updateColors);
+
+		selector.addItem(selectorItem);
+	};
+
+	addSelectorItem("Left");
+	addSelectorItem("Center");
+	addSelectorItem("Right");
+
+	selector.setOnSelectionChanged([&selector, selectorTitle] {
+		switch (selector.getSelectedIndex()) {
+			case 0: selectorTitle->setTextAlignment(Alignment::start); break;
+			case 1: selectorTitle->setTextAlignment(Alignment::center); break;
+			default: selectorTitle->setTextAlignment(Alignment::end); break;
+		}
+	});
+
+	selector.setSelectedIndex(0);
 
 	// -------------------------------- Text fields --------------------------------
 

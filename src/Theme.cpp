@@ -117,20 +117,20 @@ namespace pizda {
 		}
 		else {
 			bg1 = { 0xF0F0F0 };
-			bg2 = { 0xCCCCCC };
-			bg3 = { 0x999999 };
-			bg4 = { 0x888888 };
-			bg5 = { 0x777777 };
-			bg6 = { 0x666666 };
-			bg7 = { 0x555555 };
+			bg2 = { 0xE0E0E0 };
+			bg3 = { 0xD0D0D0 };
+			bg4 = { 0xC0C0C0 };
+			bg5 = { 0xB0B0B0 };
+			bg6 = { 0xA0A0A0 };
+			bg7 = { 0x000000 };
 
 			fg1 = { 0x000000 };
-			fg2 = { 0x0C0C0C };
-			fg3 = { 0x1C1C1C };
-			fg4 = { 0x2C2C2C };
-			fg5 = { 0x3C3C3C };
-			fg6 = { 0x4C4C4C };
-			fg7 = { 0x5C5C5C };
+			fg2 = { 0x111111 };
+			fg3 = { 0x222222 };
+			fg4 = { 0x333333 };
+			fg5 = { 0x444444 };
+			fg6 = { 0x555555 };
+			fg7 = { 0x666666 };
 
 			accent1 = { 0xffd200 };
 			accent2 = { 0x997e53 };
@@ -160,7 +160,7 @@ namespace pizda {
 	}
 
 	void Theme::applyDescription(TextView* text) {
-		text->setTextColor(&Theme::fg3);
+		text->setTextColor(&Theme::fg4);
 		text->setFont(&Theme::fontNormal);
 	}
 
@@ -172,7 +172,7 @@ namespace pizda {
 
 	void Theme::applyElementTitle(TextView* text) {
 		text->setFont(&Theme::fontNormal);
-		text->setTextColor(&Theme::fg3);
+		text->setTextColor(&Theme::fg4);
 	}
 
 	void Theme::applyPrimary(Button* button) {
@@ -234,7 +234,7 @@ namespace pizda {
 		sw->setCornerRadius(sw->getSize().getHeight() / 2);
 
 		sw->setTrackColor(&Theme::bg3);
-		sw->setCheckedColor(&Theme::accent1);
+		sw->setActiveColor(&Theme::accent1);
 
 		sw->setHandleColor(&Theme::fg1);
 
