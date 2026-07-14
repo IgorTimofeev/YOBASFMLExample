@@ -64,65 +64,49 @@ int main() {
 	MarginTransform rowsTransform {{ 15 }};
 	rows.setLayoutTransform(&rowsTransform);
 
-	const auto addPageTitle = [&rows](const std::string_view text) -> TextView* {
-		const auto textView = new TextView {};
-		Theme::applyPageTitle(textView);
-		textView->setText(text);
+	const auto addPageTitle = [&rows](const std::string_view text, TextView& textView) {
+		Theme::applyPageTitle(&textView);
+		textView.setText(text);
 
-		rows += textView;
-
-		return textView;
+		rows += &textView;
 	};
 
-	const auto addElementWithTitle = [&rows](const std::string_view title, Element* element) -> TextView* {
-		const auto titleAndElementLayout = new StackLayout {
-			4
-		};
-
-		const auto textView = new TextView {};
-		Theme::applyElementTitle(textView);
-		textView->setText(title);
-		*titleAndElementLayout += textView;
-
-		*titleAndElementLayout += element;
-
-		rows += titleAndElementLayout;
-
-		return textView;
+	const auto addPageDivider = [&rows](Divider& divider) {
+		Theme::apply(&divider);
+		rows += &divider;
 	};
 
-	const auto addDivider = [&rows]() -> Divider* {
-		const auto divider1 = new Divider {};
-		Theme::apply(divider1);
+	class TitleAndElement : public StackLayout {
+		public:
+			TitleAndElement(const std::string_view title, Element* element) {
+				setGap(4);
 
-		rows += divider1;
+				Theme::applyElementTitle(&titleTextView);
+				titleTextView.setText(title);
+				*this += &titleTextView;
 
-		return divider1;
-	};
+				*this += element;
+			}
 
-	const auto addButton = [&rows](const std::string_view text) -> Button* {
-		const auto button = new Button {};
-		Theme::applyPrimary(button);
-		button->setText(text);
-
-		rows += button;
-
-		return button;
+			TextView titleTextView {};
 	};
 
 	// -------------------------------- OWLCAT, GIVE ME $$$ --------------------------------
 
-	addPageTitle("Heresy counter")->setHorizontalAlignment(Alignment::center);
+	TextView heresyTitle {};
+	heresyTitle.setHorizontalAlignment(Alignment::center);
+	addPageTitle("Heresy counter", heresyTitle);
 
-	SevenSegment seven {};
-	seven.setActiveColor(&Theme::fg1);
-	seven.setInactiveColor(&Theme::bg4);
-	seven.setSegmentThickness(3);
-	seven.setSegmentLength(10);
-	seven.setDigitCount(4);
-	seven.setHorizontalAlignment(Alignment::center);
-	rows += &seven;
+	SevenSegment sevenSegment {};
+	sevenSegment.setActiveColor(&Theme::fg1);
+	sevenSegment.setInactiveColor(&Theme::bg4);
+	sevenSegment.setSegmentThickness(3);
+	sevenSegment.setSegmentLength(10);
+	sevenSegment.setDigitCount(4);
+	sevenSegment.setHorizontalAlignment(Alignment::center);
+	rows += &sevenSegment;
 
+	// Promo text
 	TextView owlcatTextView {};
 	Theme::applyDescription(&owlcatTextView);
 	owlcatTextView.setWrappingEnabled(true);
@@ -131,140 +115,173 @@ int main() {
 	owlcatTextView.setTextAlignment(Alignment::center);
 	rows += &owlcatTextView;
 
-	addButton("Preorder")->setOnClick([&seven] {
-		seven.setValue(seven.getValue() + 1);
+	// Preorder button
+	Button preorderButton {};
+	Theme::applyPrimary(&preorderButton);
+	preorderButton.setText("Preorder");
+
+	preorderButton.setOnClick([&sevenSegment] {
+		sevenSegment.setValue(sevenSegment.getValue() + 1);
 	});
+
+	rows += &preorderButton;
 
 	// -------------------------------- Sliders --------------------------------
 
-	addDivider();
-	addPageTitle("Sliders");
+	Divider slidersDivider {};
+	Theme::apply(&slidersDivider);
+	rows += &slidersDivider;
 
-	const auto newSlider = []() -> Slider* {
-		const auto slider = new Slider {};
+	TextView slidersTitle {};
+	addPageTitle("Sliders", slidersTitle);
 
-		Theme::apply(slider);
-		slider->setTickLabelBuilder(Slider::int32TickLabelBuilder);
+	Slider pagePaddingSlider {};
+	Theme::apply(&pagePaddingSlider);
+	pagePaddingSlider.setFillColor(&Theme::sky1);
+	pagePaddingSlider.setMinimumValue(0);
+	pagePaddingSlider.setMaximumValue(50);
+	pagePaddingSlider.setValue(rowsTransform.getMargin().getLeft());
+	pagePaddingSlider.setTickLabelBuilder(Slider::int32TickLabelBuilder);
 
-		return slider;
-	};
-
-	const auto pagePaddingSlider = newSlider();
-	pagePaddingSlider->setFillColor(&Theme::sky1);
-	pagePaddingSlider->setMinimumValue(0);
-	pagePaddingSlider->setMaximumValue(50);
-	pagePaddingSlider->setValue(rowsTransform.getMargin().getLeft());
-
-	pagePaddingSlider->setOnValueChanged([&rowsTransform, pagePaddingSlider] {
+	pagePaddingSlider.setOnValueChanged([&rowsTransform, &pagePaddingSlider] {
 		rowsTransform.setMargin({
-			static_cast<uint16_t>(std::round(pagePaddingSlider->getValue()))
+			static_cast<uint16_t>(std::round(pagePaddingSlider.getValue()))
 		});
 	});
 
-	addElementWithTitle("Page padding", pagePaddingSlider);
 
-	const auto fontScaleSlider = newSlider();
-	fontScaleSlider->setFillColor(&Theme::magenta1);
-	fontScaleSlider->setTickCount(5);
-	fontScaleSlider->setMinimumValue(1);
-	fontScaleSlider->setMaximumValue(5);
-	fontScaleSlider->setValue(pagePaddingSlider->getTickLabelFontScale());
+	TitleAndElement pagePaddingSliderTitle { "Page padding", &pagePaddingSlider };
+	rows += &pagePaddingSliderTitle;
 
-	fontScaleSlider->setOnValueChanged([fontScaleSlider, pagePaddingSlider] {
-		const auto fontScale = static_cast<uint8_t>(std::round(fontScaleSlider->getValue()));
+	Slider fontScaleSlider {};
+	Theme::apply(&fontScaleSlider);
+	fontScaleSlider.setFillColor(&Theme::magenta1);
+	fontScaleSlider.setTickCount(5);
+	fontScaleSlider.setMinimumValue(1);
+	fontScaleSlider.setMaximumValue(5);
+	fontScaleSlider.setValue(pagePaddingSlider.getTickLabelFontScale());
 
-		pagePaddingSlider->setTickLabelFontScale(fontScale);
-		fontScaleSlider->setTickLabelFontScale(fontScale);
+	fontScaleSlider.setOnValueChanged([&fontScaleSlider, &pagePaddingSlider] {
+		const auto fontScale = static_cast<uint8_t>(std::round(fontScaleSlider.getValue()));
+
+		pagePaddingSlider.setTickLabelFontScale(fontScale);
+		fontScaleSlider.setTickLabelFontScale(fontScale);
 	});
 
-	addElementWithTitle("Font scale", fontScaleSlider);
+	TitleAndElement fontScaleSliderTitle { "Font scale", &fontScaleSlider };
+	rows += &fontScaleSliderTitle;
 
 	// -------------------------------- Badges --------------------------------
 
-	addDivider();
-	addPageTitle("Badges");
+	Divider badgesDivider {};
+	addPageDivider(badgesDivider);
+
+	TextView badgesTitle {};
+	addPageTitle("Badges", badgesTitle);
 
 	WrapLayout badgesLayout { 10 };
 	rows += &badgesLayout;
 
-	const auto addImageWithBadge = [&badgesLayout](const Image* image, const std::string_view badgeText) {
-		const auto imageAndBadgeLayout = new Layout {};
-		imageAndBadgeLayout->setHorizontalAlignment(Alignment::start);
-		badgesLayout += imageAndBadgeLayout;
+	class ImageAndBadge : public Layout {
+		public:
+			ImageAndBadge(const Image* image, const std::string_view badgeText) {
+				// Image
+				imageView.setImage(image);
+				*this += &imageView;
 
-		const auto imageView = new ImageView { image };
-		*imageAndBadgeLayout += imageView;
+				// Badge
+				Theme::apply(&badge);
+				badge.setAlignment(Alignment::end, Alignment::start);
+				badge.setText(badgeText);
 
-		const auto badge = new Badge {};
-		Theme::apply(badge);
-		badge->setAlignment(Alignment::end, Alignment::start);
-		badge->setText(badgeText);
-		*imageAndBadgeLayout += badge;
+				badgeTransform.setOffset({ 5, -5 });
+				badge.setRenderingTransform(&badgeTransform);
 
-		const auto transform = new TranslateTransform {{ 5, -5 }};
-		badge->setRenderingTransform(transform);
+				*this += &badge;
+			}
+
+			ImageView imageView {};
+
+			Badge badge {};
+			TranslateTransform badgeTransform {};
 	};
 
-	addImageWithBadge(&Images::menuIconDev, "1");
-	addImageWithBadge(&Images::menuIconMFD, "2");
-	addImageWithBadge(&Images::menuIconMFDAutopilot, "3");
-	addImageWithBadge(&Images::menuIconPersonalization, "4");
+	ImageAndBadge imagesAndBadges[4] {
+		{ &Images::menuIconDev, "1"},
+		{ &Images::menuIconMFD, "2"},
+		{ &Images::menuIconMFDAutopilot, "3"},
+		{ &Images::menuIconPersonalization, "4"},
+	};
+
+	for (auto& imageAndBadge : imagesAndBadges)
+		badgesLayout += &imageAndBadge;
 
 	// -------------------------------- Switches --------------------------------
 
-	addDivider();
-	addPageTitle("Switches");
+	Divider switchesDivider {};
+	addPageDivider(switchesDivider);
 
-	const auto addTextAndSwitch = [&rows](const std::string_view text, const Color* switchColor, const bool isActive) -> Switch* {
-		const auto textAndSwitchLayout = new RelativeStackLayout {
-			Orientation::horizontal,
-			10
-		};
+	TextView switchesTitle {};
+	addPageTitle("Switches", switchesTitle);
 
-		rows += textAndSwitchLayout;
+	class TextAndSwitch : public RelativeStackLayout {
+		public:
+			TextAndSwitch(const std::string_view text, const Color* switchColor) {
+				setOrientation(Orientation::horizontal);
+				setGap(10);
 
-		const auto textView = new TextView {};
-		Theme::applyDescription(textView);
-		textView->setVerticalAlignment(Alignment::center);
-		textView->setText(text);
-		*textAndSwitchLayout += textView;
+				// Text
+				Theme::applyDescription(&textView);
+				textView.setVerticalAlignment(Alignment::center);
+				textView.setText(text);
+				*this += &textView;
 
-		const auto sw = new Switch {};
-		Theme::apply(sw);
-		sw->setVerticalAlignment(Alignment::center);
-		sw->setActiveColor(switchColor);
-		sw->setActive(isActive);
-		textAndSwitchLayout->setAutoSize(sw);
-		*textAndSwitchLayout += sw;
+				// Switch
+				Theme::apply(&sw);
+				sw.setVerticalAlignment(Alignment::center);
+				sw.setActiveColor(switchColor);
+				sw.setActive(true);
+				setAutoSize(&sw);
+				*this += &sw;
+			}
 
-		return sw;
+			TextView textView {};
+			Switch sw {};
 	};
 
-	const auto themeSwitch = addTextAndSwitch("Dark theme", &Theme::accent1, true);
+	// Theme
+	TextAndSwitch themeTextAndSwitch { "Dark theme", &Theme::accent1 };
+	rows += &themeTextAndSwitch;
 
-	themeSwitch->setOnIsActiveChanged([&themeSwitch] {
-		Theme::setColorScheme(themeSwitch->isActive());
+	themeTextAndSwitch.sw.setOnIsActiveChanged([&themeTextAndSwitch] {
+		Theme::setColorScheme(themeTextAndSwitch.sw.isActive());
 	});
 
-	addTextAndSwitch("Large penis", &Theme::sky1, true);
+	// Large penis
+	TextAndSwitch largePenisTextAndSwitch { "Large penis", &Theme::sky1 };
+	rows += &largePenisTextAndSwitch;
 
 	// -------------------------------- Selectors --------------------------------
 
-	addDivider();
-	addPageTitle("Selectors");
+	Divider selectorsDivider {};
+	addPageDivider(selectorsDivider);
+
+	TextView selectorsTitle {};
+	addPageTitle("Selectors", selectorsTitle);
 
 	// Creating selector
 	Selector selector {};
 	selector.setHeight(30);
 
-	const auto selectorTitle = addElementWithTitle("Text alignment", &selector);
+	TitleAndElement selectorTitle { "Text alignment", &selector };
+	rows += &selectorTitle;
 
 	// Assigning callback that will be called on any item selected
-	selector.setOnSelectionChanged([&selector, selectorTitle] {
+	selector.setOnSelectionChanged([&selector, &selectorTitle] {
 		switch (selector.getSelectedIndex()) {
-			case 0: selectorTitle->setTextAlignment(Alignment::start); break;
-			case 1: selectorTitle->setTextAlignment(Alignment::center); break;
-			default: selectorTitle->setTextAlignment(Alignment::end); break;
+			case 0: selectorTitle.titleTextView.setTextAlignment(Alignment::start); break;
+			case 1: selectorTitle.titleTextView.setTextAlignment(Alignment::center); break;
+			default: selectorTitle.titleTextView.setTextAlignment(Alignment::end); break;
 		}
 	});
 
@@ -303,35 +320,50 @@ int main() {
 	};
 
 	// Adding custom items to selector
-	selector.addItem(new MySelectorItem("Left"));
-	selector.addItem(new MySelectorItem("Center"));
-	selector.addItem(new MySelectorItem("Right"));
+	MySelectorItem selectorItems[] {
+		{ "Left" },
+		{ "Center" },
+		{ "Right" },
+	};
+
+	for (auto& selectorItem : selectorItems)
+		selector.addItem(&selectorItem);
 
 	// Selecting first item in list
 	selector.setSelectedIndex(0);
 
 	// -------------------------------- Text fields --------------------------------
 
-	addDivider();
-	addPageTitle("Text fields");
+	Divider textFieldsDivider {};
+	addPageDivider(textFieldsDivider);
 
-	TextField textField1 {};
-	Theme::apply(&textField1);
-	textField1.setPlaceholder("Abc");
+	TextView textFieldsTitle {};
+	addPageTitle("Text fields", textFieldsTitle);
 
-	addElementWithTitle("Regular", &textField1);
+	// Regular
+	TextField regularTextField {};
+	Theme::apply(&regularTextField);
+	regularTextField.setPlaceholder("Abc");
 
-	TextField textField2 {};
-	Theme::apply(&textField2);
-	textField2.setPlaceholder("123");
-	textField2.setKeyboardLayoutOptions(KeyboardLayoutOptions::numeric | KeyboardLayoutOptions::allowSigned);
+	TitleAndElement regularTextFieldTitle { "Regular", &regularTextField };
+	rows += &regularTextFieldTitle;
 
-	addElementWithTitle("Numeric", &textField2);
+	// Numeric
+	TextField numericTextField {};
+	Theme::apply(&numericTextField);
+	numericTextField.setPlaceholder("123");
+	numericTextField.setKeyboardLayoutOptions(KeyboardLayoutOptions::numeric | KeyboardLayoutOptions::allowSigned);
+
+	TitleAndElement numericTextFieldTitle { "Numeric", &numericTextField };
+	rows += &numericTextFieldTitle;
 
 	// -------------------------------- Animations --------------------------------
 
-	addDivider();
-	addPageTitle("Animations");
+	Divider animationsDivider {};
+	addPageDivider(animationsDivider);
+
+	TextView animationsTitle {};
+	addPageTitle("Animations", animationsTitle);
 
 	ProgressBar progressBar {};
 	Theme::apply(&progressBar);
@@ -370,30 +402,41 @@ int main() {
 		updateProgressText();
 	});
 
-	ScaleTransform scaleButtonTransform {};
+	// Progress animation button
+	Button animationsProgressButton {};
+	Theme::applyPrimary(&animationsProgressButton);
+	animationsProgressButton.setText("Hack");
 
-	addButton("Hack")->setOnClick([&progressAnimation] {
+	animationsProgressButton.setOnClick([&progressAnimation] {
 		progressAnimation.stop();
 		progressAnimation.start();
 	});
 
-	auto scaleButton = addButton("Toggle scale");
-	Theme::applyPlaceholder(scaleButton);
-	scaleButton->setRenderingTransform(&scaleButtonTransform);
-	scaleButton->setToggle(true);
+	rows += &animationsProgressButton;
+
+	// Scale button
+	Button scaleButton {};
+	Theme::applyPlaceholder(&scaleButton);
+	scaleButton.setToggle(true);
+	scaleButton.setText("Toggle scale");
+
+	ScaleTransform scaleButtonTransform {};
+	scaleButton.setRenderingTransform(&scaleButtonTransform);
 
 	ScaleTransformAnimation scaleButtonAnimation {};
-	scaleButtonAnimation.setTarget(scaleButton);
+	scaleButtonAnimation.setTarget(&scaleButton);
 	scaleButtonAnimation.setTransform(&scaleButtonTransform);
 	scaleButtonAnimation.setDuration(250'000);
 
-	scaleButton->setOnClick([&scaleButtonAnimation, &scaleButton, &scaleButtonTransform] {
+	scaleButton.setOnClick([&scaleButtonAnimation, &scaleButton, &scaleButtonTransform] {
 		scaleButtonAnimation.stop();
 
 		scaleButtonAnimation.setFrom(scaleButtonTransform.getScale());
-		scaleButtonAnimation.setTo(scaleButton->isActive() ? Vector2F(0.9f) : Vector2F(1, 1));
+		scaleButtonAnimation.setTo(scaleButton.isActive() ? Vector2F(0.9f) : Vector2F(1.f));
 		scaleButtonAnimation.start();
 	});
+
+	rows += &scaleButton;
 
 	// -------------------------------- Main loop with SFML event handling --------------------------------
 

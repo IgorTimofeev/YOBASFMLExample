@@ -46,8 +46,8 @@ namespace pizda {
 			keyboard->setKeyHeight(24);
 			keyboard->setKeyCornerRadius(0);
 
-			keyboard->setHorizontalKeySpacing(1);
-			keyboard->setVerticalKeySpacing(1);
+			keyboard->setHorizontalKeyGap(1);
+			keyboard->setVerticalKeyGap(1);
 
 			keyboard->setDefaultKeyBackgroundColor(&Theme::bg3);
 			keyboard->setDefaultKeyTextColor(&Theme::fg1);
