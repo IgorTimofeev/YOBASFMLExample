@@ -377,7 +377,7 @@ int main() {
 	ProgressBar progressBar {};
 	Theme::apply(&progressBar);
 	progressBar.setFillColor(&Theme::good1);
-	progressBar.setValue(0);
+	progressBar.setValue(1.0f);
 	rows += &progressBar;
 
 	TextView progressText {};
@@ -391,7 +391,7 @@ int main() {
 		std::snprintf(
 			textBuffer,
 			sizeof(textBuffer),
-			"Casino pumped out by %d%%",
+			"Secrets remaining: %d%%",
 			static_cast<uint8_t>(progressBar.getValue() * 100)
 		);
 
@@ -401,27 +401,15 @@ int main() {
 	updateProgressText();
 
 	FloatAnimation progressAnimation {};
-	progressAnimation.setFrom(0);
-	progressAnimation.setTo(1);
+	progressAnimation.setFrom(1.0f);
+	progressAnimation.setTo(0.0f);
 	progressAnimation.setDuration(3'000'000);
 
 	progressAnimation.setOnTick([&progressBar, &progressAnimation, &updateProgressText] {
-		progressBar.setValue(progressAnimation.getProgress());
+		progressBar.setValue(progressAnimation.getValue());
 
 		updateProgressText();
 	});
-
-	// Progress animation button
-	Button animationsProgressButton {};
-	Theme::applyPrimary(&animationsProgressButton);
-	animationsProgressButton.setText("Hack");
-
-	animationsProgressButton.setOnClick([&progressAnimation] {
-		progressAnimation.stop();
-		progressAnimation.start();
-	});
-
-	rows += &animationsProgressButton;
 
 	// -------------------------------- Dialog button --------------------------------
 
@@ -560,15 +548,20 @@ int main() {
 	Theme::applyCritical(&dialogsButton);
 	dialogsButton.setText("Delete secrets");
 
-	dialogsButton.setOnClick([] {
+	dialogsButton.setOnClick([&progressAnimation] {
 		const auto dialog = new ConfirmationDialog {};
 
 		dialog->setup(
 			&Images::menuIconMFD,
 			"Retard alert",
 			"Are you sure want to delete QueenSnakePrn.mov? This action is permanent.",
-			[dialog](const bool confirmed) {
-				dialog->hide([dialog] {
+			[dialog, &progressAnimation](const bool confirmed) {
+				dialog->hide([dialog, confirmed, &progressAnimation] {
+					if (confirmed) {
+						progressAnimation.stop();
+						progressAnimation.start();
+					}
+
 					Application::getCurrent()->invokeLater([dialog] {
 						delete dialog;
 					});
@@ -662,14 +655,6 @@ int main() {
 				};
 
 				application.pushEvent(&mouseWheelEvent);
-			}
-			else if (event->is<sf::Event::Resized>()) {
-				auto resizedEvent = event->getIf<sf::Event::Resized>();
-
-				auto view = SFWindow.getView();
-				view.setSize(sf::Vector2f(resizedEvent->size));
-				view.setCenter(view.getSize() / 2.f);
-				SFWindow.setView(view);
 			}
 			else if (event->is<sf::Event::Closed>()) {
 				SFWindow.close();
