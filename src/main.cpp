@@ -239,28 +239,33 @@ int main() {
 				*this += &textView;
 
 				// Switch
-				Theme::apply(&sw);
-				sw.setVerticalAlignment(Alignment::center);
-				sw.setActiveColor(switchColor);
-				sw.setActive(true);
-				setAutoSize(&sw);
-				*this += &sw;
+				Theme::apply(&swtch);
+				swtch.setVerticalAlignment(Alignment::center);
+				swtch.setActiveColor(switchColor);
+				swtch.setActive(true);
+				setAutoSize(&swtch);
+				*this += &swtch;
 			}
 
 			TextView textView {};
-			Switch sw {};
+			Switch swtch {};
 	};
 
 	// Theme
 	TextAndSwitch themeTextAndSwitch { "Dark theme", &Theme::accent1 };
 	rows += &themeTextAndSwitch;
 
-	themeTextAndSwitch.sw.setOnIsActiveChanged([&themeTextAndSwitch] {
-		Theme::setColorScheme(themeTextAndSwitch.sw.isActive());
+	themeTextAndSwitch.swtch.setOnIsActiveChanged([&themeTextAndSwitch] {
+		Theme::setColorScheme(themeTextAndSwitch.swtch.isActive());
 	});
 
 	// Large penis
 	TextAndSwitch largePenisTextAndSwitch { "Large penis", &Theme::sky1 };
+
+	largePenisTextAndSwitch.swtch.setOnIsActiveChanged([&largePenisTextAndSwitch] {
+		largePenisTextAndSwitch.textView.setText(largePenisTextAndSwitch.swtch.isActive() ? "8========D" : ":--->");
+	});
+
 	rows += &largePenisTextAndSwitch;
 
 	// -------------------------------- Selectors --------------------------------
@@ -359,167 +364,6 @@ int main() {
 	TitleAndElement numericTextFieldTitle { "Numeric", &numericTextField };
 	rows += &numericTextFieldTitle;
 
-	// -------------------------------- Dialogs --------------------------------
-
-	Divider dialogsDivider {};
-	addPageDivider(dialogsDivider);
-
-	TextView dialogsTitle {};
-	addPageTitle("Dialogs", dialogsTitle);
-
-	class Dialog : public RelativeStackLayout {
-		public:
-			Dialog() {
-				// Chess pattern rect
-				chessPattern.setFillColor(&Theme::bg1);
-				*this += &chessPattern;
-
-				// Content and background
-				setAutoSize(&contentAndBackgroundLayout);
-				*this += &contentAndBackgroundLayout;
-
-				// Background
-				backgroundRectangle.setFillColor(&Theme::bg2);
-				contentAndBackgroundLayout += &backgroundRectangle;
-
-				// Content
-				contentLayout.setGap(10);
-
-				contentLayoutMargin.setMargin({ 15 });
-				contentLayout.setLayoutTransform(&contentLayoutMargin);
-
-				contentAndBackgroundLayout += &contentLayout;
-			}
-
-			ChessPatternRectangularShape chessPattern {};
-
-			Layout contentAndBackgroundLayout {};
-			RectangularShape backgroundRectangle {};
-
-			MarginTransform contentLayoutMargin {};
-			StackLayout contentLayout {};
-
-			SizeAnimation animation {};
-
-			void show() {
-				*Application::getCurrent() += this;
-
-				animation.setFrom({ Application::getCurrent()->getSize().getWidth(), 0 });
-				animation.setTo({ Application::getCurrent()->getSize().getWidth(), Size::computed });
-				animation.setDuration(100'000);
-				animation.setTarget(&contentAndBackgroundLayout);
-				animation.start();
-			}
-
-			void hide(const std::function<void()>& onHide) {
-				animation.setFrom({ Application::getCurrent()->getSize().getWidth(), Size::computed });
-				animation.setTo({ Application::getCurrent()->getSize().getWidth(), 0 });
-				animation.setDuration(100'000);
-				animation.setTarget(&contentAndBackgroundLayout);
-
-				animation.setOnStateChanged([this, onHide](const AnimationState state) {
-					if (state == AnimationState::completed) {
-						Application::getCurrent()->invokeLater([this, onHide] {
-							*Application::getCurrent() -= this;
-
-							onHide();
-						});
-					}
-				});
-
-				animation.start();
-			}
-	};
-
-	class ConfirmationDialog : public Dialog {
-		public:
-			void setup(
-				const Image* icon,
-				const std::string_view title,
-				const std::string_view description,
-				const std::function<void(const bool confirmed)>& onActionPerformed
-			) {
-				// Title
-				Theme::applyPageTitle(&titleTextView);
-				contentLayout += &titleTextView;
-				titleTextView.setText(title);
-
-				// Icon & description
-				iconAndDescriptionLayout.setOrientation(Orientation::horizontal);
-				iconAndDescriptionLayout.setGap(10);
-				contentLayout += &iconAndDescriptionLayout;
-
-				// Icon
-				iconImageView.setVerticalAlignment(Alignment::start);
-				iconImageView.setImage(icon);
-				iconAndDescriptionLayout.setAutoSize(&iconImageView);
-				iconAndDescriptionLayout += &iconImageView;
-
-				// Description
-				Theme::applyDescription(&descriptionTextView);
-				descriptionTextView.setWrappingEnabled(true);
-				descriptionTextView.setText(description);
-				iconAndDescriptionLayout += &descriptionTextView;
-
-				// Confirm
-				Theme::applyPrimary(&confirmButton);
-				confirmButton.setText("Confirm");
-
-				confirmButton.setOnClick([onActionPerformed] {
-					Application::getCurrent()->invokeLater([onActionPerformed] {
-						onActionPerformed(true);
-					});
-				});
-
-				contentLayout += &confirmButton;
-
-				// Cancel
-				Theme::applySecondary(&cancelButton);
-				cancelButton.setText("Cancel");
-
-				cancelButton.setOnClick([onActionPerformed] {
-					Application::getCurrent()->invokeLater([onActionPerformed] {
-						onActionPerformed(false);
-					});
-				});
-
-				contentLayout += &cancelButton;
-			}
-
-			TextView titleTextView {};
-
-			RelativeStackLayout iconAndDescriptionLayout {};
-			ImageView iconImageView {};
-			TextView descriptionTextView {};
-
-			Button confirmButton {};
-			Button cancelButton {};
-
-	};
-
-	Button dialogsButton {};
-	Theme::applyCritical(&dialogsButton);
-	dialogsButton.setText("Delete secrets");
-
-	dialogsButton.setOnClick([] {
-		const auto dialog = new ConfirmationDialog {};
-
-		dialog->setup(
-			&Images::menuIconMFD,
-			"Retard alert",
-			"Are you sure want to delete QueenSnakePrn.mov? This action is permanent.",
-			[dialog](const bool confirmed) {
-				dialog->hide([dialog] {
-					delete dialog;
-				});
-			}
-		);
-
-		dialog->show();
-	});
-
-	rows += &dialogsButton;
-
 	// -------------------------------- Animations --------------------------------
 
 	Divider animationsDivider {};
@@ -528,9 +372,11 @@ int main() {
 	TextView animationsTitle {};
 	addPageTitle("Animations", animationsTitle);
 
+	// -------------------------------- Progress button --------------------------------
+
 	ProgressBar progressBar {};
 	Theme::apply(&progressBar);
-	progressBar.setFillColor(&Theme::bad1);
+	progressBar.setFillColor(&Theme::good1);
 	progressBar.setValue(0);
 	rows += &progressBar;
 
@@ -577,7 +423,166 @@ int main() {
 
 	rows += &animationsProgressButton;
 
-	// Scale button
+	// -------------------------------- Dialog button --------------------------------
+
+	class Dialog : public RelativeStackLayout {
+		public:
+			Dialog() {
+				// Overlay
+				overlayShape.setFillColor(&Theme::bg1);
+				*this += &overlayShape;
+
+				// Content and background
+				setAutoSize(&contentAndBackgroundLayout);
+				*this += &contentAndBackgroundLayout;
+
+				// Background
+				backgroundRectangle.setFillColor(&Theme::bg2);
+				contentAndBackgroundLayout += &backgroundRectangle;
+
+				// Content
+				contentLayout.setGap(10);
+
+				contentLayoutMarginTransform.setMargin({ 15 });
+				contentLayout.setLayoutTransform(&contentLayoutMarginTransform);
+
+				contentAndBackgroundLayout += &contentLayout;
+
+				// Title
+				Theme::applyPageTitle(&titleTextView);
+				contentLayout += &titleTextView;
+
+				// Slide animation
+				slideAnimation.setDuration(250'000);
+				slideAnimation.setTarget(&contentAndBackgroundLayout);
+			}
+
+			ChessPatternRectangularShape overlayShape {};
+
+			Layout contentAndBackgroundLayout {};
+			RectangularShape backgroundRectangle {};
+
+			MarginTransform contentLayoutMarginTransform {};
+			StackLayout contentLayout {};
+
+			TextView titleTextView {};
+
+			SizeAnimation slideAnimation {};
+
+			void show() {
+				*Application::getCurrent() += this;
+
+				slideAnimation.setFrom({ Size::computed, 0 });
+				slideAnimation.setTo({ Size::computed, Size::computed });
+				slideAnimation.setOnStateChanged(nullptr);
+				slideAnimation.start();
+			}
+
+			void hide(const std::function<void()>& onHide) {
+				slideAnimation.setFrom({ Size::computed, Size::computed });
+				slideAnimation.setTo({ Size::computed, 0 });
+
+				slideAnimation.setOnStateChanged([this, onHide](const AnimationState state) {
+					if (state != AnimationState::completed)
+						return;
+
+					auto myFunc = [this, onHide] {
+						*Application::getCurrent() -= this;
+
+						onHide();
+					};
+
+					Application::getCurrent()->invokeLater(myFunc);
+				});
+
+				slideAnimation.start();
+			}
+	};
+
+	class ConfirmationDialog : public Dialog {
+		public:
+			void setup(
+				const Image* icon,
+				const std::string_view title,
+				const std::string_view description,
+				const std::function<void(const bool confirmed)>& onActionPerformed
+			) {
+				// Title
+				titleTextView.setText(title);
+
+				// Icon & description
+				iconAndDescriptionLayout.setOrientation(Orientation::horizontal);
+				iconAndDescriptionLayout.setGap(10);
+				contentLayout += &iconAndDescriptionLayout;
+
+				// Icon
+				iconImageView.setVerticalAlignment(Alignment::start);
+				iconImageView.setImage(icon);
+				iconAndDescriptionLayout.setAutoSize(&iconImageView);
+				iconAndDescriptionLayout += &iconImageView;
+
+				// Description
+				Theme::applyDescription(&descriptionTextView);
+				descriptionTextView.setWrappingEnabled(true);
+				descriptionTextView.setText(description);
+				iconAndDescriptionLayout += &descriptionTextView;
+
+				// Confirm
+				Theme::applyPrimary(&confirmButton);
+				confirmButton.setText("Confirm");
+
+				confirmButton.setOnClick([onActionPerformed] {
+					onActionPerformed(true);
+				});
+
+				contentLayout += &confirmButton;
+
+				// Cancel
+				Theme::applySecondary(&cancelButton);
+				cancelButton.setText("Cancel");
+
+				cancelButton.setOnClick([onActionPerformed] {
+					onActionPerformed(false);
+				});
+
+				contentLayout += &cancelButton;
+			}
+
+			RelativeStackLayout iconAndDescriptionLayout {};
+			ImageView iconImageView {};
+			TextView descriptionTextView {};
+
+			Button confirmButton {};
+			Button cancelButton {};
+	};
+
+	Button dialogsButton {};
+	Theme::applyCritical(&dialogsButton);
+	dialogsButton.setText("Delete secrets");
+
+	dialogsButton.setOnClick([] {
+		const auto dialog = new ConfirmationDialog {};
+
+		dialog->setup(
+			&Images::menuIconMFD,
+			"Retard alert",
+			"Are you sure want to delete QueenSnakePrn.mov? This action is permanent.",
+			[dialog](const bool confirmed) {
+				dialog->hide([dialog] {
+					Application::getCurrent()->invokeLater([dialog] {
+						delete dialog;
+					});
+				});
+			}
+		);
+
+		dialog->show();
+	});
+
+	rows += &dialogsButton;
+
+	// -------------------------------- Scale button --------------------------------
+
 	Button scaleButton {};
 	Theme::applyPlaceholder(&scaleButton);
 	scaleButton.setToggle(true);

@@ -40,8 +40,8 @@ namespace pizda {
 
 		// Keyboard
 		KeyboardController::setOnShow([](Keyboard* keyboard) {
-			keyboard->setFont(&Theme::fontNormal);
-			keyboard->setBackgroundColor(&Theme::bg1);
+			keyboard->setFont(&fontNormal);
+			keyboard->setBackgroundColor(&bg1);
 
 			keyboard->setKeyHeight(24);
 			keyboard->setKeyCornerRadius(0);
@@ -49,14 +49,14 @@ namespace pizda {
 			keyboard->setHorizontalKeyGap(1);
 			keyboard->setVerticalKeyGap(1);
 
-			keyboard->setDefaultKeyBackgroundColor(&Theme::bg3);
-			keyboard->setDefaultKeyTextColor(&Theme::fg1);
+			keyboard->setDefaultKeyBackgroundColor(&bg3);
+			keyboard->setDefaultKeyTextColor(&fg1);
 
-			keyboard->setActionKeyBackgroundColor(&Theme::bg2);
-			keyboard->setActionKeyTextColor(&Theme::fg1);
+			keyboard->setActionKeyBackgroundColor(&bg2);
+			keyboard->setActionKeyTextColor(&fg1);
 
-			keyboard->setDisabledKeyBackgroundColor(&Theme::bg2);
-			keyboard->setDisabledKeyTextColor(&Theme::fg6);
+			keyboard->setDisabledKeyBackgroundColor(&bg2);
+			keyboard->setDisabledKeyTextColor(&fg6);
 
 			keyboard->setNumericLayoutBuilder([] {
 				return new NumericKeyboardLayout();
@@ -155,63 +155,63 @@ namespace pizda {
 	}
 
 	void Theme::apply(TextView* text) {
-		text->setTextColor(&Theme::fg1);
-		text->setFont(&Theme::fontNormal);
+		text->setTextColor(&fg1);
+		text->setFont(&fontNormal);
 	}
 
 	void Theme::applyDescription(TextView* text) {
-		text->setTextColor(&Theme::fg4);
-		text->setFont(&Theme::fontNormal);
+		text->setTextColor(&fg4);
+		text->setFont(&fontNormal);
 	}
 
 	void Theme::applyPageTitle(TextView* text) {
-		text->setTextColor(&Theme::fg1);
-		text->setFont(&Theme::fontNormal);
+		text->setTextColor(&fg1);
+		text->setFont(&fontNormal);
 		text->setFontScale(2);
 	}
 
 	void Theme::applyElementTitle(TextView* text) {
-		text->setFont(&Theme::fontNormal);
-		text->setTextColor(&Theme::fg4);
+		text->setFont(&fontNormal);
+		text->setTextColor(&fg4);
 	}
 
 	void Theme::applyPrimary(Button* button) {
 		button->setHeight(elementHeight);
 		button->setCornerRadius(cornerRadius);
 
-		button->setDefaultBackgroundColor(&Theme::accent1);
-		button->setDefaultTextColor(&Theme::bg1);
+		button->setDefaultBackgroundColor(&accent1);
+		button->setDefaultTextColor(&bg1);
 
-		button->setActiveBackgroundColor(&Theme::accent2);
-		button->setActiveTextColor(&Theme::bg1);
+		button->setActiveBackgroundColor(&accent2);
+		button->setActiveTextColor(&bg1);
 
-		button->setFont(&Theme::fontNormal);
+		button->setFont(&fontNormal);
 	}
 
 	void Theme::applySecondary(Button* button) {
 		button->setHeight(elementHeight);
 		button->setCornerRadius(cornerRadius);
 
-		button->setDefaultBackgroundColor(&Theme::bg3);
-		button->setDefaultTextColor(&Theme::fg3);
+		button->setDefaultBackgroundColor(&bg3);
+		button->setDefaultTextColor(&fg3);
 
-		button->setActiveBackgroundColor(&Theme::bg5);
-		button->setActiveTextColor(&Theme::fg1);
+		button->setActiveBackgroundColor(&bg5);
+		button->setActiveTextColor(&fg1);
 
-		button->setFont(&Theme::fontNormal);
+		button->setFont(&fontNormal);
 	}
 
 	void Theme::applyCritical(Button* button) {
 		button->setHeight(elementHeight);
 		button->setCornerRadius(cornerRadius);
 
-		button->setDefaultBackgroundColor(&Theme::bad1);
-		button->setDefaultTextColor(&Theme::fg1);
+		button->setDefaultBackgroundColor(&bad1);
+		button->setDefaultTextColor(&fg1);
 
-		button->setActiveBackgroundColor(&Theme::bad3);
-		button->setActiveTextColor(&Theme::fg1);
+		button->setActiveBackgroundColor(&bad3);
+		button->setActiveTextColor(&fg1);
 
-		button->setFont(&Theme::fontNormal);
+		button->setFont(&fontNormal);
 	}
 
 	void Theme::applyPlaceholder(Button* button) {
@@ -219,24 +219,24 @@ namespace pizda {
 		button->setCornerRadius(cornerRadius);
 
 		button->setDefaultBackgroundColor(nullptr);
-		button->setDefaultBorderColor(&Theme::fg5);
-		button->setDefaultTextColor(&Theme::fg5);
+		button->setDefaultBorderColor(&fg5);
+		button->setDefaultTextColor(&fg5);
 
 		button->setActiveBackgroundColor(nullptr);
-		button->setActiveBorderColor(&Theme::fg1);
-		button->setActiveTextColor(&Theme::fg1);
+		button->setActiveBorderColor(&fg1);
+		button->setActiveTextColor(&fg1);
 
-		button->setFont(&Theme::fontNormal);
+		button->setFont(&fontNormal);
 	}
 
 	void Theme::apply(Switch* sw) {
 		sw->setSize(Size(38, 16));
 		sw->setCornerRadius(sw->getSize().getHeight() / 2);
 
-		sw->setTrackColor(&Theme::bg3);
-		sw->setActiveColor(&Theme::accent1);
+		sw->setTrackColor(&bg3);
+		sw->setActiveColor(&accent1);
 
-		sw->setHandleColor(&Theme::fg1);
+		sw->setHandleColor(&fg1);
 
 		sw->setAnimationDuration(250'000);
 	}
@@ -248,15 +248,15 @@ namespace pizda {
 		// Track
 		slider->setTrackSize(5);
 		slider->setTrackCornerRadius(slider->getTrackSize() / 2);
-		slider->setTrackColor(&Theme::bg3);
+		slider->setTrackColor(&bg3);
 
 		// Fill
-		slider->setFillColor(&Theme::accent1);
+		slider->setFillColor(&accent1);
 
 		// Handle
 		slider->setHandleSize({ 2, 10 });
 		slider->setHandleCornerRadius(0);
-		slider->setHandleColor(&Theme::fg1);
+		slider->setHandleColor(&fg1);
 
 		// Tick
 		slider->setTickCount(10);
@@ -264,9 +264,9 @@ namespace pizda {
 		slider->setTickOffset(0);
 		slider->setBigTickLineLength(5);
 		slider->setSmallTickLineLength(3);
-		slider->setTickColor(&Theme::fg6);
+		slider->setTickColor(&fg6);
 
-		slider->setTickLabelFont(&Theme::fontNormal);
+		slider->setTickLabelFont(&fontNormal);
 		slider->setTickLabelOffset(1);
 
 		slider->setTickLabelBuilder(Slider::percentTickLabelBuilder);
@@ -275,15 +275,15 @@ namespace pizda {
 	void Theme::apply(ProgressBar* progressBar) {
 		progressBar->setHeight(5);
 		progressBar->setCornerRadius(2);
-		progressBar->setTrackColor(&Theme::bg3);
-		progressBar->setFillColor(&Theme::accent1);
+		progressBar->setTrackColor(&bg3);
+		progressBar->setFillColor(&accent1);
 	}
 
 	void Theme::apply(ScrollView* scrollView) {
 		scrollView->setScrollBarSize(3);
 		scrollView->setScrollBarCornerRadius(1);
 		scrollView->setScrollBarOffset(3);
-		scrollView->setScrollBarThumbColor(&Theme::bg3);
+		scrollView->setScrollBarThumbColor(&bg3);
 	}
 
 	void Theme::apply(TextField* textField) {
@@ -291,25 +291,25 @@ namespace pizda {
 		textField->setCornerRadius(cornerRadius);
 		textField->setTextMargin(10);
 
-		textField->setDefaultBackgroundColor(&Theme::bg3);
-		textField->setFocusedBackgroundColor(&Theme::bg4);
+		textField->setDefaultBackgroundColor(&bg3);
+		textField->setFocusedBackgroundColor(&bg4);
 
-		textField->setDefaultTextColor(&Theme::fg1);
-		textField->setFocusedTextColor(&Theme::fg1);
+		textField->setDefaultTextColor(&fg1);
+		textField->setFocusedTextColor(&fg1);
 
-		textField->setDefaultBorderColor(&Theme::bg4);
-		textField->setFocusedBorderColor(&Theme::accent1);
+		textField->setDefaultBorderColor(&bg4);
+		textField->setFocusedBorderColor(&accent1);
 
-		textField->setPlaceholderColor(&Theme::fg5);
-		textField->setCursorColor(&Theme::accent1);
+		textField->setPlaceholderColor(&fg5);
+		textField->setCursorColor(&accent1);
 
-		textField->setFont(&Theme::fontNormal);
+		textField->setFont(&fontNormal);
 	}
 
 	void Theme::apply(Divider* divider) {
 		divider->setOrientation(Orientation::horizontal);
 		divider->setHeight(5);
-		divider->setFillColor(&Theme::bg4);
+		divider->setFillColor(&bg4);
 	}
 
 	void Theme::apply(Badge* badge) {
@@ -317,9 +317,9 @@ namespace pizda {
 		badge->setCornerRadius(badge->getSize().getHeight() / 2);
 		badge->setTextMargin(Margin(5, 0, 5, 0));
 
-		badge->setFillColor(&Theme::bad1);
-		badge->setTextColor(&Theme::fg1);
+		badge->setFillColor(&bad1);
+		badge->setTextColor(&fg1);
 
-		badge->setFont(&Theme::fontSmall);
+		badge->setFont(&fontSmall);
 	}
 }
