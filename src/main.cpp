@@ -141,7 +141,6 @@ int main() {
 	pagePaddingSlider.setMinimumValue(0);
 	pagePaddingSlider.setMaximumValue(50);
 	pagePaddingSlider.setValue(rowsTransform.getMargin().getLeft());
-	pagePaddingSlider.setTickLabelBuilder(Slider::int32TickLabelBuilder);
 
 	pagePaddingSlider.setOnValueChanged([&rowsTransform, &pagePaddingSlider] {
 		rowsTransform.setMargin({
@@ -149,6 +148,7 @@ int main() {
 		});
 	});
 
+	pagePaddingSlider.setTickLabelBuilder(Slider::int32TickLabelBuilder);
 
 	TitleAndElement pagePaddingSliderTitle { "Page padding", &pagePaddingSlider };
 	rows += &pagePaddingSliderTitle;
@@ -167,6 +167,8 @@ int main() {
 		pagePaddingSlider.setTickLabelFontScale(fontScale);
 		fontScaleSlider.setTickLabelFontScale(fontScale);
 	});
+
+	fontScaleSlider.setTickLabelBuilder(Slider::int32TickLabelBuilder);
 
 	TitleAndElement fontScaleSliderTitle { "Font scale", &fontScaleSlider };
 	rows += &fontScaleSliderTitle;
@@ -357,6 +359,167 @@ int main() {
 	TitleAndElement numericTextFieldTitle { "Numeric", &numericTextField };
 	rows += &numericTextFieldTitle;
 
+	// -------------------------------- Dialogs --------------------------------
+
+	Divider dialogsDivider {};
+	addPageDivider(dialogsDivider);
+
+	TextView dialogsTitle {};
+	addPageTitle("Dialogs", dialogsTitle);
+
+	class Dialog : public RelativeStackLayout {
+		public:
+			Dialog() {
+				// Chess pattern rect
+				chessPattern.setFillColor(&Theme::bg1);
+				*this += &chessPattern;
+
+				// Content and background
+				setAutoSize(&contentAndBackgroundLayout);
+				*this += &contentAndBackgroundLayout;
+
+				// Background
+				backgroundRectangle.setFillColor(&Theme::bg2);
+				contentAndBackgroundLayout += &backgroundRectangle;
+
+				// Content
+				contentLayout.setGap(10);
+
+				contentLayoutMargin.setMargin({ 15 });
+				contentLayout.setLayoutTransform(&contentLayoutMargin);
+
+				contentAndBackgroundLayout += &contentLayout;
+			}
+
+			ChessPatternRectangularShape chessPattern {};
+
+			Layout contentAndBackgroundLayout {};
+			RectangularShape backgroundRectangle {};
+
+			MarginTransform contentLayoutMargin {};
+			StackLayout contentLayout {};
+
+			SizeAnimation animation {};
+
+			void show() {
+				*Application::getCurrent() += this;
+
+				animation.setFrom({ Application::getCurrent()->getSize().getWidth(), 0 });
+				animation.setTo({ Application::getCurrent()->getSize().getWidth(), Size::computed });
+				animation.setDuration(100'000);
+				animation.setTarget(&contentAndBackgroundLayout);
+				animation.start();
+			}
+
+			void hide(const std::function<void()>& onHide) {
+				animation.setFrom({ Application::getCurrent()->getSize().getWidth(), Size::computed });
+				animation.setTo({ Application::getCurrent()->getSize().getWidth(), 0 });
+				animation.setDuration(100'000);
+				animation.setTarget(&contentAndBackgroundLayout);
+
+				animation.setOnStateChanged([this, onHide](const AnimationState state) {
+					if (state == AnimationState::completed) {
+						Application::getCurrent()->invokeLater([this, onHide] {
+							*Application::getCurrent() -= this;
+
+							onHide();
+						});
+					}
+				});
+
+				animation.start();
+			}
+	};
+
+	class ConfirmationDialog : public Dialog {
+		public:
+			void setup(
+				const Image* icon,
+				const std::string_view title,
+				const std::string_view description,
+				const std::function<void(const bool confirmed)>& onActionPerformed
+			) {
+				// Title
+				Theme::applyPageTitle(&titleTextView);
+				contentLayout += &titleTextView;
+				titleTextView.setText(title);
+
+				// Icon & description
+				iconAndDescriptionLayout.setOrientation(Orientation::horizontal);
+				iconAndDescriptionLayout.setGap(10);
+				contentLayout += &iconAndDescriptionLayout;
+
+				// Icon
+				iconImageView.setVerticalAlignment(Alignment::start);
+				iconImageView.setImage(icon);
+				iconAndDescriptionLayout.setAutoSize(&iconImageView);
+				iconAndDescriptionLayout += &iconImageView;
+
+				// Description
+				Theme::applyDescription(&descriptionTextView);
+				descriptionTextView.setWrappingEnabled(true);
+				descriptionTextView.setText(description);
+				iconAndDescriptionLayout += &descriptionTextView;
+
+				// Confirm
+				Theme::applyPrimary(&confirmButton);
+				confirmButton.setText("Confirm");
+
+				confirmButton.setOnClick([onActionPerformed] {
+					Application::getCurrent()->invokeLater([onActionPerformed] {
+						onActionPerformed(true);
+					});
+				});
+
+				contentLayout += &confirmButton;
+
+				// Cancel
+				Theme::applySecondary(&cancelButton);
+				cancelButton.setText("Cancel");
+
+				cancelButton.setOnClick([onActionPerformed] {
+					Application::getCurrent()->invokeLater([onActionPerformed] {
+						onActionPerformed(false);
+					});
+				});
+
+				contentLayout += &cancelButton;
+			}
+
+			TextView titleTextView {};
+
+			RelativeStackLayout iconAndDescriptionLayout {};
+			ImageView iconImageView {};
+			TextView descriptionTextView {};
+
+			Button confirmButton {};
+			Button cancelButton {};
+
+	};
+
+	Button dialogsButton {};
+	Theme::applyCritical(&dialogsButton);
+	dialogsButton.setText("Delete secrets");
+
+	dialogsButton.setOnClick([] {
+		const auto dialog = new ConfirmationDialog {};
+
+		dialog->setup(
+			&Images::menuIconMFD,
+			"Retard alert",
+			"Are you sure want to delete QueenSnakePrn.mov? This action is permanent.",
+			[dialog](const bool confirmed) {
+				dialog->hide([dialog] {
+					delete dialog;
+				});
+			}
+		);
+
+		dialog->show();
+	});
+
+	rows += &dialogsButton;
+
 	// -------------------------------- Animations --------------------------------
 
 	Divider animationsDivider {};
@@ -514,6 +677,7 @@ int main() {
 
 		application.invalidate();
 		application.tick();
+		application.updateLayout();
 		application.render();
 
 		const auto FPSMeasurementDurationUs =
