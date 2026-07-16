@@ -11,7 +11,7 @@ namespace pizda {
 	class MenuIconDevImage : public Image {
 		public:
 			constexpr MenuIconDevImage() : Image(
-				ColorModel::RGB888,
+				ColorModel::ARGB,
 				ImageOptions::none,
 				Size(45, 33),
 				_bitmap

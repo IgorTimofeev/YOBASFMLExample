@@ -6,19 +6,23 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Main
-file(GLOB_RECURSE MAIN_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
+set(MAIN_SOURCES
+	src/main.cpp
+	src/Theme.cpp
+)
+
 add_executable(main ${MAIN_SOURCES})
 target_compile_features(main PRIVATE cxx_std_23)
 
 # SFML
 include(FetchContent)
 FetchContent_Declare(
-    SFML
-    GIT_REPOSITORY https://github.com/SFML/SFML.git
-    GIT_TAG 3.1.0
-    GIT_SHALLOW ON
-    EXCLUDE_FROM_ALL
-    SYSTEM
+	SFML
+	GIT_REPOSITORY https://github.com/SFML/SFML.git
+	GIT_TAG 3.1.0
+	GIT_SHALLOW ON
+	EXCLUDE_FROM_ALL
+	SYSTEM
 )
 FetchContent_MakeAvailable(SFML)
 

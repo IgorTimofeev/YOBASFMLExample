@@ -14,51 +14,52 @@ namespace pizda {
 			// -------------------------------- Colors --------------------------------
 
 			// Background
-			static RGB888Color bg1;
-			static RGB888Color bg2;
-			static RGB888Color bg3;
-			static RGB888Color bg4;
-			static RGB888Color bg5;
-			static RGB888Color bg6;
-			static RGB888Color bg7;
+			static ARGBColor bg1;
+			static ARGBColor bg2;
+			static ARGBColor bg3;
+			static ARGBColor bg4;
+			static ARGBColor bg5;
+			static ARGBColor bg6;
+			static ARGBColor bg7;
 			// Foreground
-			static RGB888Color fg1;
-			static RGB888Color fg2;
-			static RGB888Color fg3;
-			static RGB888Color fg4;
-			static RGB888Color fg5;
-			static RGB888Color fg6;
-			static RGB888Color fg7;
+			static ARGBColor fg1;
+			static ARGBColor fg2;
+			static ARGBColor fg3;
+			static ARGBColor fg4;
+			static ARGBColor fg5;
+			static ARGBColor fg6;
+			static ARGBColor fg7;
 			// Accent
-			static RGB888Color accent1;
-			static RGB888Color accent2;
+			static ARGBColor accent1;
+			static ARGBColor accent2;
 			// Good
-			static RGB888Color good1;
-			static RGB888Color good2;
+			static ARGBColor good1;
+			static ARGBColor good2;
 			// Bad
-			static RGB888Color bad1;
-			static RGB888Color bad2;
-			static RGB888Color bad3;
+			static ARGBColor bad1;
+			static ARGBColor bad2;
+			static ARGBColor bad3;
 			// Red
-			static RGB888Color red;
+			static ARGBColor red;
 			// Green
-			static RGB888Color green1;
-			static RGB888Color green2;
+			static ARGBColor green1;
+			static ARGBColor green2;
 			// Blue
-			static RGB888Color blue;
+			static ARGBColor blue;
 			// Magenta
-			static RGB888Color magenta1;
-			static RGB888Color magenta2;
+			static ARGBColor magenta1;
+			static ARGBColor magenta2;
+
 			// Ocean
-			static RGB888Color ocean;
+			static ARGBColor ocean;
 			// Yellow
-			static RGB888Color yellow;
+			static ARGBColor yellow;
 			// Ground
-			static RGB888Color ground1;
-			static RGB888Color ground2;
+			static ARGBColor ground1;
+			static ARGBColor ground2;
 			// Sky
-			static RGB888Color sky1;
-			static RGB888Color sky2;
+			static ARGBColor sky1;
+			static ARGBColor sky2;
 
 			// -------------------------------- Fonts --------------------------------
 

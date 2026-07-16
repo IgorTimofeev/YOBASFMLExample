@@ -32,7 +32,7 @@
 #include "Resources/Images/MenuIconTransceiverImage.hpp"
 #include "Resources/Images/MenuIconWaypointsImage.hpp"
 #include "Resources/Images/MenuIconWiFiImage.hpp"
-#include "Resources/Images/SplashScreenImage.hpp"
+#include "Resources/Images/PizdaImage.hpp"
 
 namespace pizda {
 	class Images {
@@ -66,6 +66,6 @@ namespace pizda {
 			constexpr static MenuIconTransceiverImage menuIconTransceiver {};
 			constexpr static MenuIconWaypointsImage menuIconWaypoints {};
 			constexpr static MenuIconWiFiImage menuIconWiFi {};
-			constexpr static SplashScreenImage splashScreen {};
+			constexpr static PizdaImage pizda {};
 	};
 }

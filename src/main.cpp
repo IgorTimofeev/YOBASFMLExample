@@ -42,7 +42,7 @@ int main() {
 	SFMLSpriteRenderingTarget renderingTarget {};
 	renderingTarget.setup(virtualScreenResolution, virtualScreenRenderingScale);
 
-	RGB888BufferedRenderer renderer {};
+	ARGBBufferedRenderer renderer {};
 	renderer.setTarget(&renderingTarget);
 
 	// -------------------------------- Tons of UI components --------------------------------
@@ -477,7 +477,7 @@ int main() {
 		public:
 			Dialog() {
 				// Overlay
-				overlayShape.setFillColor(&Theme::bg1);
+				overlayShape.setFillColor(&overlayColor);
 				*this += &overlayShape;
 
 				// Content and background
@@ -505,7 +505,8 @@ int main() {
 				slideAnimation.setTarget(&contentAndBackgroundLayout);
 			}
 
-			ChessPatternRectangularShape overlayShape {};
+			RectangularShape overlayShape {};
+			ARGBColor overlayColor { 0x99, 0x00, 0x00, 0x00 };
 
 			Layout contentAndBackgroundLayout {};
 			RectangularShape backgroundRectangle {};

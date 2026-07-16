@@ -11,7 +11,7 @@ namespace pizda {
 	class MenuIconMFDPFDImage : public Image {
 		public:
 			constexpr MenuIconMFDPFDImage() : Image(
-				ColorModel::RGB888,
+				ColorModel::ARGB,
 				ImageOptions::none,
 				Size(45, 33),
 				_bitmap
