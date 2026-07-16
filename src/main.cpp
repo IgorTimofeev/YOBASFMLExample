@@ -268,6 +268,66 @@ int main() {
 
 	rows += &largePenisTextAndSwitch;
 
+	// -------------------------------- Spinners --------------------------------
+
+	Divider spinnersDivider {};
+	addPageDivider(spinnersDivider);
+
+	TextView spinnersTitle {};
+	addPageTitle("Spinners", spinnersTitle);
+
+	RelativeStackLayout spinnersLayout {
+		Orientation::horizontal,
+		10
+	};
+
+	spinnersLayout.setHeight(30);
+
+	rows += &spinnersLayout;
+
+	ProgressSpinner spinner1 {};
+	spinner1.setThickness(1);
+	spinner1.setTrackColor(&Theme::bg4);
+	spinner1.setFillColor(&Theme::bad1);
+	spinner1.setValue(0.5f);
+	spinnersLayout += &spinner1;
+
+	ProgressSpinner spinner2 {};
+	spinner2.setThickness(1);
+	spinner2.setTrackColor(&Theme::bg4);
+	spinner2.setFillColor(&Theme::fg1);
+	spinner2.setValue(0.5f);
+	spinnersLayout += &spinner2;
+
+	IndeterminateSpinner spinner3 {};
+	spinner3.setThickness(3);
+	spinner3.setTrackColor(&Theme::ground1);
+	spinner3.setFillColor(&Theme::ground2);
+	spinner3.setRotationSpeed(Math::toRadians(360));
+	spinnersLayout += &spinner3;
+
+	IndeterminateSpinner spinner4 {};
+	spinner4.setThickness(3);
+	spinner4.setTrackColor(&Theme::sky1);
+	spinner4.setFillColor(&Theme::sky2);
+	spinner4.setRotationSpeed(Math::toRadians(720));
+	spinnersLayout += &spinner4;
+
+	Slider spinnersSlider {};
+	Theme::apply(&spinnersSlider);
+	spinnersSlider.setFillColor(&Theme::fg1);
+	spinnersSlider.setValue(0.5);
+
+	spinnersSlider.setOnValueChanged([&spinner1, &spinner2, &spinnersSlider] {
+		spinner1.setValue(spinnersSlider.getValue());
+		spinner2.setValue(1.f - spinnersSlider.getValue());
+	});
+
+	spinnersSlider.setTickLabelBuilder(Slider::percentTickLabelBuilder);
+
+	TitleAndElement spinnersSliderTitle { "Progress", &spinnersSlider };
+	rows += &spinnersSliderTitle;
+
 	// -------------------------------- Selectors --------------------------------
 
 	Divider selectorsDivider {};
