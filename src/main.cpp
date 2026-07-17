@@ -213,44 +213,23 @@ int main() {
 	TextView switchesTitle {};
 	addPageTitle("Switches", switchesTitle);
 
-	class TextAndSwitch : public RelativeStackLayout {
-		public:
-			TextAndSwitch(const std::string_view text, const Color* switchColor) {
-				setOrientation(Orientation::horizontal);
-				setGap(10);
-
-				// Text
-				Theme::applyDescription(&textView);
-				textView.setVerticalAlignment(Alignment::center);
-				textView.setText(text);
-				*this += &textView;
-
-				// Switch
-				Theme::apply(&swtch);
-				swtch.setVerticalAlignment(Alignment::center);
-				swtch.setActiveColor(switchColor);
-				swtch.setActive(true);
-				setAutoSize(&swtch);
-				*this += &swtch;
-			}
-
-			TextView textView {};
-			Switch swtch {};
-	};
-
 	// Theme
-	TextAndSwitch themeTextAndSwitch { "Dark theme", &Theme::accent1 };
-	rows += &themeTextAndSwitch;
+	TextAndSwitch themeTextAndSwitch { "Dark theme", true };
+	Theme::apply(&themeTextAndSwitch);
 
-	themeTextAndSwitch.swtch.setOnIsActiveChanged([&themeTextAndSwitch] {
-		Theme::setColorScheme(themeTextAndSwitch.swtch.isActive());
+	themeTextAndSwitch.switch_.setOnIsActiveChanged([&themeTextAndSwitch] {
+		Theme::setColorScheme(themeTextAndSwitch.switch_.isActive());
 	});
 
-	// Large penis
-	TextAndSwitch largePenisTextAndSwitch { "Large penis", &Theme::sky1 };
+	rows += &themeTextAndSwitch;
 
-	largePenisTextAndSwitch.swtch.setOnIsActiveChanged([&largePenisTextAndSwitch] {
-		largePenisTextAndSwitch.textView.setText(largePenisTextAndSwitch.swtch.isActive() ? "8========D" : ":--->");
+	// Large penis
+	TextAndSwitch largePenisTextAndSwitch { "Large penis", true };
+	Theme::apply(&largePenisTextAndSwitch);
+	largePenisTextAndSwitch.switch_.setActiveColor(&Theme::sky1);
+
+	largePenisTextAndSwitch.switch_.setOnIsActiveChanged([&largePenisTextAndSwitch] {
+		largePenisTextAndSwitch.textView.setText(largePenisTextAndSwitch.switch_.isActive() ? "8========D" : "8==D");
 	});
 
 	rows += &largePenisTextAndSwitch;
@@ -511,6 +490,11 @@ int main() {
 			ConfirmationDialog() {
 				Theme::apply(this);
 
+				// Overlay
+				overlayShape.setOnPointerEvent([this] {
+					close(nullptr);
+				});
+
 				// Slide animation
 				slideAnimation.setDuration(250'000);
 				slideAnimation.setTarget(&backgroundAndContentLayout);
@@ -592,7 +576,8 @@ int main() {
 					Application::getCurrent()->invokeLater([this, onClose] {
 						Theme::closeDialog(this);
 
-						onClose();
+						if (onClose)
+							onClose();
 					});
 				});
 
@@ -612,15 +597,11 @@ int main() {
 			"Retard alert",
 			"Are you sure want to delete QueenSnakePrn.mov? This action is permanent.",
 			[dialog, &progressAnimation](const bool confirmed) {
-				dialog->close([dialog, confirmed, &progressAnimation] {
+				dialog->close([confirmed, &progressAnimation] {
 					if (confirmed) {
 						progressAnimation.stop();
 						progressAnimation.start();
 					}
-
-					Application::getCurrent()->invokeLater([dialog] {
-						delete dialog;
-					});
 				});
 			}
 		);

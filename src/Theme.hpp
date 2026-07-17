@@ -98,6 +98,7 @@ namespace pizda {
 			static void apply(TitleStackLayoutBottomSheetDialog* dialog);
 			static void apply(ColorPickerDialog* dialog);
 			static void apply(ColorPicker* colorPicker);
+			static void apply(TextAndSwitch* textAndSwitch);
 
 			static void openDialog(BottomSheetDialog* dialog);
 			static void closeDialog(BottomSheetDialog* dialog);

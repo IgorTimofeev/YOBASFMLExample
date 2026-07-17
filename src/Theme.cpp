@@ -414,6 +414,14 @@ namespace pizda {
 		});
 	}
 
+	void Theme::apply(TextAndSwitch* textAndSwitch) {
+		// Text
+		apply(&textAndSwitch->textView);
+
+		// Switch
+		apply(&textAndSwitch->switch_);
+	}
+
 	void Theme::openDialog(BottomSheetDialog* dialog) {
 		*Application::getCurrent() += dialog;
 	}
