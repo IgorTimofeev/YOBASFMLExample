@@ -15,6 +15,7 @@ namespace pizda {
 	ARGBColor Theme::fg5 {};
 	ARGBColor Theme::fg6 {};
 	ARGBColor Theme::fg7 {};
+	ARGBColor Theme::overlay {};
 	ARGBColor Theme::accent1 {};
 	ARGBColor Theme::accent2 {};
 	ARGBColor Theme::good1 {};
@@ -95,6 +96,7 @@ namespace pizda {
 			fg6 = { 0xFF666666 };
 			fg7 = { 0xFF555555 };
 
+			overlay = { 0x88000000 };
 			accent1 = { 0xFFffd200 };
 			accent2 = { 0xFF997e53 };
 			good1 = { 0xFF1db153 };
@@ -132,6 +134,7 @@ namespace pizda {
 			fg6 = { 0xFF555555 };
 			fg7 = { 0xFF666666 };
 
+			overlay = { 0x88000000 };
 			accent1 = { 0xFFffd200 };
 			accent2 = { 0xFF997e53 };
 			good1 = { 0xFF1db153 };
@@ -321,5 +324,104 @@ namespace pizda {
 		badge->setTextColor(&fg1);
 
 		badge->setFont(&fontSmall);
+	}
+
+	void Theme::apply(Titler* titler) {
+		titler->setGap(4);
+		applyElementTitle(&titler->titleTextView);
+	}
+
+	void Theme::apply(BottomSheetDialog* dialog) {
+		// Background
+		dialog->backgroundShape.setFillColor(&Theme::bg2);
+		
+		// Overlay
+		dialog->overlayShape.setFillColor(&Theme::overlay);
+		
+		dialog->overlayShape.setOnPointerEvent([dialog] {
+			Application::getCurrent()->invokeLater([dialog] {
+				closeDialog(dialog);
+			});
+		});
+	}
+
+	void Theme::apply(StackLayoutBottomSheetDialog* dialog) {
+		apply(static_cast<BottomSheetDialog*>(dialog));
+
+		// Scroll view
+		apply(&dialog->contentScrollView);
+	}
+	
+	void Theme::apply(TitleStackLayoutBottomSheetDialog* dialog) {
+		apply(static_cast<StackLayoutBottomSheetDialog*>(dialog));
+
+		// Title
+		applyPageTitle(&dialog->titleTextView);
+	}
+
+	void Theme::apply(ColorPickerDialog* dialog) {
+		apply(static_cast<TitleStackLayoutBottomSheetDialog*>(dialog));
+		
+		// Color palette
+		dialog->colorPalette.setHeight(120);
+		dialog->colorPalette.setHandleColor(&fg1);
+		dialog->colorPalette.setPixelSize(4);
+
+		// Text fields
+		dialog->textFieldRow.setGap(6);
+
+		apply(&dialog->hueTitler);
+		apply(&dialog->hueTextField);
+		dialog->hueTextField.setTextMargin(8);
+
+		apply(&dialog->saturationTitler);
+		apply(&dialog->saturationTextField);
+		dialog->saturationTextField.setTextMargin(dialog->hueTextField.getTextMargin());
+
+		apply(&dialog->brightnessTitler);
+		apply(&dialog->brightnessTextField);
+		dialog->brightnessTextField.setTextMargin(dialog->hueTextField.getTextMargin());
+
+		apply(&dialog->hexTitler);
+		apply(&dialog->hexTextField);
+		dialog->hexTextField.setTextMargin(dialog->hueTextField.getTextMargin());
+		dialog->textFieldRow.setRelativeSize(&dialog->hexTitler, 1.5);
+
+		// Confirm button
+		applyPrimary(&dialog->confirmButton);
+	}
+
+	void Theme::apply(ColorPicker* colorPicker) {
+		colorPicker->setHeight(elementHeight);
+		colorPicker->setCornerRadius(cornerRadius);
+
+		colorPicker->setDefaultBorerColor(&bg4);
+		colorPicker->setActiveBorerColor(&fg1);
+
+		colorPicker->setDialogOpener([] {
+			const auto dialog = new ColorPickerDialog();
+			apply(dialog);
+
+			openDialog(dialog);
+
+			return dialog;
+		});
+
+		colorPicker->setDialogCloser([](ColorPickerDialog* dialog) {
+			Application::getCurrent()->invokeLater([dialog] {
+				closeDialog(dialog);
+			});
+		});
+	}
+
+	void Theme::openDialog(BottomSheetDialog* dialog) {
+		*Application::getCurrent() += dialog;
+	}
+
+	void Theme::closeDialog(BottomSheetDialog* dialog) {
+		// Maybe dialog is not in application layout anymore
+		dialog->removeFromParent();
+
+		delete dialog;
 	}
 }

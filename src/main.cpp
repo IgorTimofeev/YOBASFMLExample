@@ -76,21 +76,6 @@ int main() {
 		rows += &divider;
 	};
 
-	class TitleAndElement : public StackLayout {
-		public:
-			TitleAndElement(const std::string_view title, Element* element) {
-				setGap(4);
-
-				Theme::applyElementTitle(&titleTextView);
-				titleTextView.setText(title);
-				*this += &titleTextView;
-
-				*this += element;
-			}
-
-			TextView titleTextView {};
-	};
-
 	// -------------------------------- OWLCAT, GIVE ME $$$ --------------------------------
 
 	TextView heresyTitle {};
@@ -150,7 +135,8 @@ int main() {
 
 	pagePaddingSlider.setTickLabelBuilder(Slider::int32TickLabelBuilder);
 
-	TitleAndElement pagePaddingSliderTitle { "Page padding", &pagePaddingSlider };
+	Titler pagePaddingSliderTitle { "Page padding", &pagePaddingSlider };
+	Theme::apply(&pagePaddingSliderTitle);
 	rows += &pagePaddingSliderTitle;
 
 	Slider fontScaleSlider {};
@@ -170,7 +156,8 @@ int main() {
 
 	fontScaleSlider.setTickLabelBuilder(Slider::int32TickLabelBuilder);
 
-	TitleAndElement fontScaleSliderTitle { "Font scale", &fontScaleSlider };
+	Titler fontScaleSliderTitle { "Font scale", &fontScaleSlider };
+	Theme::apply(&fontScaleSliderTitle);
 	rows += &fontScaleSliderTitle;
 
 	// -------------------------------- Badges --------------------------------
@@ -268,6 +255,48 @@ int main() {
 
 	rows += &largePenisTextAndSwitch;
 
+	// -------------------------------- Color pickers --------------------------------
+
+	Divider colorPickersDivider {};
+	Theme::apply(&colorPickersDivider);
+	rows += &colorPickersDivider;
+
+	TextView colorPickersTitle {};
+	addPageTitle("Color pickers", colorPickersTitle);
+
+	RelativeStackLayout colorPickersRow {
+		Orientation::horizontal,
+		10
+	};
+
+	rows += &colorPickersRow;
+
+	// Background
+	ColorPicker backgroundColorPicker {};
+	Theme::apply(&backgroundColorPicker);
+	backgroundColorPicker.setSelectedColor({ 0x000000 });
+
+	backgroundColorPicker.setOnSelectedColorChanged([&] {
+		Theme::bg1 = backgroundColorPicker.getSelectedColor().toARGB();
+	});
+
+	Titler backgroundColorTitle { "Background", &backgroundColorPicker };
+	Theme::apply(&backgroundColorTitle);
+	colorPickersRow += &backgroundColorTitle;
+
+	// Foreground
+	ColorPicker foregroundColorPicker {};
+	Theme::apply(&foregroundColorPicker);
+	foregroundColorPicker.setSelectedColor({ 0xFFFFFF });
+
+	foregroundColorPicker.setOnSelectedColorChanged([&] {
+		Theme::fg1 = foregroundColorPicker.getSelectedColor().toARGB();
+	});
+
+	Titler foregroundColorPickerTitle { "Foreground", &foregroundColorPicker };
+	Theme::apply(&foregroundColorPickerTitle);
+	colorPickersRow += &foregroundColorPickerTitle;
+
 	// -------------------------------- Spinners --------------------------------
 
 	Divider spinnersDivider {};
@@ -325,7 +354,8 @@ int main() {
 
 	spinnersSlider.setTickLabelBuilder(Slider::percentTickLabelBuilder);
 
-	TitleAndElement spinnersSliderTitle { "Progress", &spinnersSlider };
+	Titler spinnersSliderTitle { "Progress", &spinnersSlider };
+	Theme::apply(&spinnersSliderTitle);
 	rows += &spinnersSliderTitle;
 
 	// -------------------------------- Selectors --------------------------------
@@ -340,7 +370,8 @@ int main() {
 	Selector selector {};
 	selector.setHeight(30);
 
-	TitleAndElement selectorTitle { "Text alignment", &selector };
+	Titler selectorTitle { "Text alignment", &selector };
+	Theme::apply(&selectorTitle);
 	rows += &selectorTitle;
 
 	// Assigning callback that will be called on any item selected
@@ -412,7 +443,8 @@ int main() {
 	Theme::apply(&regularTextField);
 	regularTextField.setPlaceholder("Abc");
 
-	TitleAndElement regularTextFieldTitle { "Regular", &regularTextField };
+	Titler regularTextFieldTitle { "Regular", &regularTextField };
+	Theme::apply(&regularTextFieldTitle);
 	rows += &regularTextFieldTitle;
 
 	// Numeric
@@ -421,7 +453,8 @@ int main() {
 	numericTextField.setPlaceholder("123");
 	numericTextField.setKeyboardLayoutOptions(KeyboardLayoutOptions::numeric | KeyboardLayoutOptions::allowSigned);
 
-	TitleAndElement numericTextFieldTitle { "Numeric", &numericTextField };
+	Titler numericTextFieldTitle { "Numeric", &numericTextField };
+	Theme::apply(&numericTextFieldTitle);
 	rows += &numericTextFieldTitle;
 
 	// -------------------------------- Animations --------------------------------
@@ -473,83 +506,25 @@ int main() {
 
 	// -------------------------------- Dialog button --------------------------------
 
-	class Dialog : public RelativeStackLayout {
+	class ConfirmationDialog : public TitleStackLayoutBottomSheetDialog {
 		public:
-			Dialog() {
-				// Overlay
-				overlayShape.setFillColor(&overlayColor);
-				*this += &overlayShape;
-
-				// Content and background
-				setAutoSize(&contentAndBackgroundLayout);
-				*this += &contentAndBackgroundLayout;
-
-				// Background
-				backgroundRectangle.setFillColor(&Theme::bg2);
-				contentAndBackgroundLayout += &backgroundRectangle;
-
-				// Content
-				contentLayout.setGap(10);
-
-				contentLayoutMarginTransform.setMargin({ 15 });
-				contentLayout.setLayoutTransform(&contentLayoutMarginTransform);
-
-				contentAndBackgroundLayout += &contentLayout;
-
-				// Title
-				Theme::applyPageTitle(&titleTextView);
-				contentLayout += &titleTextView;
+			ConfirmationDialog() {
+				Theme::apply(this);
 
 				// Slide animation
 				slideAnimation.setDuration(250'000);
-				slideAnimation.setTarget(&contentAndBackgroundLayout);
+				slideAnimation.setTarget(&backgroundAndContentLayout);
 			}
 
-			RectangularShape overlayShape {};
-			ARGBColor overlayColor { 0x99, 0x00, 0x00, 0x00 };
+			RelativeStackLayout iconAndDescriptionLayout {};
+			ImageView iconImageView {};
+			TextView descriptionTextView {};
 
-			Layout contentAndBackgroundLayout {};
-			RectangularShape backgroundRectangle {};
-
-			MarginTransform contentLayoutMarginTransform {};
-			StackLayout contentLayout {};
-
-			TextView titleTextView {};
+			Button confirmButton {};
+			Button cancelButton {};
 
 			SizeAnimation slideAnimation {};
 
-			void show() {
-				*Application::getCurrent() += this;
-
-				slideAnimation.setFrom({ Size::computed, 0 });
-				slideAnimation.setTo({ Size::computed, Size::computed });
-				slideAnimation.setOnStateChanged(nullptr);
-				slideAnimation.start();
-			}
-
-			void hide(const std::function<void()>& onHide) {
-				slideAnimation.setFrom({ Size::computed, Size::computed });
-				slideAnimation.setTo({ Size::computed, 0 });
-
-				slideAnimation.setOnStateChanged([this, onHide](const AnimationState state) {
-					if (state != AnimationState::completed)
-						return;
-
-					auto myFunc = [this, onHide] {
-						*Application::getCurrent() -= this;
-
-						onHide();
-					};
-
-					Application::getCurrent()->invokeLater(myFunc);
-				});
-
-				slideAnimation.start();
-			}
-	};
-
-	class ConfirmationDialog : public Dialog {
-		public:
 			void setup(
 				const Image* icon,
 				const std::string_view title,
@@ -562,7 +537,7 @@ int main() {
 				// Icon & description
 				iconAndDescriptionLayout.setOrientation(Orientation::horizontal);
 				iconAndDescriptionLayout.setGap(10);
-				contentLayout += &iconAndDescriptionLayout;
+				contentStackLayout += &iconAndDescriptionLayout;
 
 				// Icon
 				iconImageView.setVerticalAlignment(Alignment::start);
@@ -584,7 +559,7 @@ int main() {
 					onActionPerformed(true);
 				});
 
-				contentLayout += &confirmButton;
+				contentStackLayout += &confirmButton;
 
 				// Cancel
 				Theme::applySecondary(&cancelButton);
@@ -594,15 +569,35 @@ int main() {
 					onActionPerformed(false);
 				});
 
-				contentLayout += &cancelButton;
+				contentStackLayout += &cancelButton;
 			}
 
-			RelativeStackLayout iconAndDescriptionLayout {};
-			ImageView iconImageView {};
-			TextView descriptionTextView {};
+			void open() {
+				Theme::openDialog(this);
 
-			Button confirmButton {};
-			Button cancelButton {};
+				slideAnimation.setFrom({ Size::computed, 0 });
+				slideAnimation.setTo({ Size::computed, Size::computed });
+				slideAnimation.setOnStateChanged(nullptr);
+				slideAnimation.start();
+			}
+
+			void close(const std::function<void()>& onClose) {
+				slideAnimation.setFrom({ Size::computed, Size::computed });
+				slideAnimation.setTo({ Size::computed, 0 });
+
+				slideAnimation.setOnStateChanged([this, onClose](const AnimationState state) {
+					if (state != AnimationState::completed)
+						return;
+
+					Application::getCurrent()->invokeLater([this, onClose] {
+						Theme::closeDialog(this);
+
+						onClose();
+					});
+				});
+
+				slideAnimation.start();
+			}
 	};
 
 	Button dialogsButton {};
@@ -617,7 +612,7 @@ int main() {
 			"Retard alert",
 			"Are you sure want to delete QueenSnakePrn.mov? This action is permanent.",
 			[dialog, &progressAnimation](const bool confirmed) {
-				dialog->hide([dialog, confirmed, &progressAnimation] {
+				dialog->close([dialog, confirmed, &progressAnimation] {
 					if (confirmed) {
 						progressAnimation.stop();
 						progressAnimation.start();
@@ -630,7 +625,7 @@ int main() {
 			}
 		);
 
-		dialog->show();
+		dialog->open();
 	});
 
 	rows += &dialogsButton;

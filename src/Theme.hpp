@@ -29,6 +29,8 @@ namespace pizda {
 			static ARGBColor fg5;
 			static ARGBColor fg6;
 			static ARGBColor fg7;
+			// Overlay
+			static ARGBColor overlay;
 			// Accent
 			static ARGBColor accent1;
 			static ARGBColor accent2;
@@ -90,5 +92,14 @@ namespace pizda {
 			static void applyDescription(TextView* text);
 			static void apply(Divider* divider);
 			static void apply(Badge* badge);
+			static void apply(Titler* titler);
+			static void apply(BottomSheetDialog* dialog);
+			static void apply(StackLayoutBottomSheetDialog* dialog);
+			static void apply(TitleStackLayoutBottomSheetDialog* dialog);
+			static void apply(ColorPickerDialog* dialog);
+			static void apply(ColorPicker* colorPicker);
+
+			static void openDialog(BottomSheetDialog* dialog);
+			static void closeDialog(BottomSheetDialog* dialog);
 	};
 }
