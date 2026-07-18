@@ -12,9 +12,9 @@ add_executable(${PROJECT_NAME}
 )
 
 # Resources (fonts, images, etc.)
-file(GLOB_RECURSE RESOURCE_FILES "resources/*")
+file(GLOB_RECURSE RESOURCE_FILES CONFIGURE_DEPENDS "resources/*")
 
-foreach (RESOURCE_FILE ${RESOURCE_FILES})
+foreach(RESOURCE_FILE ${RESOURCE_FILES})
   file(RELATIVE_PATH RESOURCE_FILE_RELATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}" "${RESOURCE_FILE}")
 
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
@@ -22,7 +22,7 @@ foreach (RESOURCE_FILE ${RESOURCE_FILES})
 	"${RESOURCE_FILE}"
 	"$<TARGET_FILE_DIR:${PROJECT_NAME}>/${RESOURCE_FILE_RELATIVE_PATH}"
   )
-endforeach ()
+endforeach()
 
 # SFML
 include(FetchContent)

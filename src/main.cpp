@@ -726,7 +726,6 @@ int main() {
 		};
 
 		FPSText.setPosition({ 10, 10 });
-		FPSText.setStyle(sf::Text::Bold);
 		FPSText.setFillColor(sf::Color::Magenta);
 		SFWindow.draw(FPSText);
 
