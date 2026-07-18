@@ -109,7 +109,7 @@ int main() {
 	rows += &owlcatTextView;
 
 	// Preorder button
-	Button preorderButton {};
+	TextButton preorderButton {};
 	Theme::applyPrimary(&preorderButton);
 	preorderButton.setText("Preorder");
 
@@ -506,8 +506,8 @@ int main() {
 			ImageView iconImageView {};
 			TextView descriptionTextView {};
 
-			Button confirmButton {};
-			Button cancelButton {};
+			TextButton confirmButton {};
+			TextButton cancelButton {};
 
 			SizeAnimation slideAnimation {};
 
@@ -587,7 +587,7 @@ int main() {
 			}
 	};
 
-	Button dialogsButton {};
+	TextButton dialogsButton {};
 	Theme::applyCritical(&dialogsButton);
 	dialogsButton.setText("Delete secrets");
 
@@ -615,7 +615,7 @@ int main() {
 
 	// -------------------------------- Scale button --------------------------------
 
-	Button scaleButton {};
+	TextButton scaleButton {};
 	Theme::applyPlaceholder(&scaleButton);
 	scaleButton.setToggle(true);
 	scaleButton.setText("Toggle scale");
@@ -632,7 +632,7 @@ int main() {
 		scaleButtonAnimation.stop();
 
 		scaleButtonAnimation.setFrom(scaleButtonTransform.getScale());
-		scaleButtonAnimation.setTo(scaleButton.isActive() ? Vector2F(0.9f) : Vector2F(1.f));
+		scaleButtonAnimation.setTo({ scaleButton.isActive() ? 0.9f : 1.0f });
 		scaleButtonAnimation.start();
 	});
 

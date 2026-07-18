@@ -178,58 +178,58 @@ namespace pizda {
 		text->setTextColor(&fg4);
 	}
 
-	void Theme::applyPrimary(Button* button) {
-		button->setHeight(elementHeight);
-		button->setCornerRadius(cornerRadius);
+	void Theme::applyPrimary(TextButton* TextButton) {
+		TextButton->setHeight(elementHeight);
+		TextButton->setCornerRadius(cornerRadius);
 
-		button->setDefaultBackgroundColor(&accent1);
-		button->setDefaultTextColor(&bg1);
+		TextButton->setDefaultBackgroundColor(&accent1);
+		TextButton->setDefaultTextColor(&bg1);
 
-		button->setActiveBackgroundColor(&accent2);
-		button->setActiveTextColor(&bg1);
+		TextButton->setActiveBackgroundColor(&accent2);
+		TextButton->setActiveTextColor(&bg1);
 
-		button->setFont(&fontNormal);
+		TextButton->setFont(&fontNormal);
 	}
 
-	void Theme::applySecondary(Button* button) {
-		button->setHeight(elementHeight);
-		button->setCornerRadius(cornerRadius);
+	void Theme::applySecondary(TextButton* TextButton) {
+		TextButton->setHeight(elementHeight);
+		TextButton->setCornerRadius(cornerRadius);
 
-		button->setDefaultBackgroundColor(&bg3);
-		button->setDefaultTextColor(&fg3);
+		TextButton->setDefaultBackgroundColor(&bg3);
+		TextButton->setDefaultTextColor(&fg3);
 
-		button->setActiveBackgroundColor(&bg5);
-		button->setActiveTextColor(&fg1);
+		TextButton->setActiveBackgroundColor(&bg5);
+		TextButton->setActiveTextColor(&fg1);
 
-		button->setFont(&fontNormal);
+		TextButton->setFont(&fontNormal);
 	}
 
-	void Theme::applyCritical(Button* button) {
-		button->setHeight(elementHeight);
-		button->setCornerRadius(cornerRadius);
+	void Theme::applyCritical(TextButton* TextButton) {
+		TextButton->setHeight(elementHeight);
+		TextButton->setCornerRadius(cornerRadius);
 
-		button->setDefaultBackgroundColor(&bad1);
-		button->setDefaultTextColor(&fg1);
+		TextButton->setDefaultBackgroundColor(&bad1);
+		TextButton->setDefaultTextColor(&fg1);
 
-		button->setActiveBackgroundColor(&bad3);
-		button->setActiveTextColor(&fg1);
+		TextButton->setActiveBackgroundColor(&bad3);
+		TextButton->setActiveTextColor(&fg1);
 
-		button->setFont(&fontNormal);
+		TextButton->setFont(&fontNormal);
 	}
 
-	void Theme::applyPlaceholder(Button* button) {
-		button->setHeight(elementHeight);
-		button->setCornerRadius(cornerRadius);
+	void Theme::applyPlaceholder(TextButton* TextButton) {
+		TextButton->setHeight(elementHeight);
+		TextButton->setCornerRadius(cornerRadius);
 
-		button->setDefaultBackgroundColor(nullptr);
-		button->setDefaultBorderColor(&fg5);
-		button->setDefaultTextColor(&fg5);
+		TextButton->setDefaultBackgroundColor(nullptr);
+		TextButton->setDefaultBorderColor(&fg5);
+		TextButton->setDefaultTextColor(&fg5);
 
-		button->setActiveBackgroundColor(nullptr);
-		button->setActiveBorderColor(&fg1);
-		button->setActiveTextColor(&fg1);
+		TextButton->setActiveBackgroundColor(nullptr);
+		TextButton->setActiveBorderColor(&fg1);
+		TextButton->setActiveTextColor(&fg1);
 
-		button->setFont(&fontNormal);
+		TextButton->setFont(&fontNormal);
 	}
 
 	void Theme::apply(Switch* sw) {
@@ -387,7 +387,7 @@ namespace pizda {
 		dialog->hexTextField.setTextMargin(dialog->hueTextField.getTextMargin());
 		dialog->textFieldRow.setRelativeSize(&dialog->hexTitler, 1.5);
 
-		// Confirm button
+		// Confirm TextButton
 		applyPrimary(&dialog->confirmButton);
 	}
 
