@@ -4,6 +4,8 @@
 #include <functional>
 #include <cmath>
 
+#include <SFML/Graphics.hpp>
+
 #include <YOBA/Core.hpp>
 #include <YOBA/Rendering.hpp>
 #include <YOBA/UI.hpp>

@@ -416,7 +416,7 @@ namespace pizda {
 
 	void Theme::apply(TextAndSwitch* textAndSwitch) {
 		// Text
-		apply(&textAndSwitch->textView);
+		applyDescription(&textAndSwitch->textView);
 
 		// Switch
 		apply(&textAndSwitch->switch_);
