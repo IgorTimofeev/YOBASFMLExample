@@ -3,6 +3,7 @@
 #include <string>
 #include <functional>
 #include <cmath>
+#include <format>
 
 #include <SFML/Graphics.hpp>
 
@@ -465,16 +466,10 @@ int main() {
 	rows += &progressText;
 
 	const auto updateProgressText = [&progressText, &progressBar] {
-		char textBuffer[32];
-
-		std::snprintf(
-			textBuffer,
-			sizeof(textBuffer),
-			"Secrets remaining: %d%%",
+		progressText.setText(std::format(
+			"Secrets remanining: {}%",
 			static_cast<uint8_t>(progressBar.getValue() * 100)
-		);
-
-		progressText.setText(textBuffer);
+		));
 	};
 
 	updateProgressText();
@@ -702,8 +697,9 @@ int main() {
 
 		const auto FPSMeasurementStart = std::chrono::steady_clock::now();
 
-		// If UI state hasn't changed, YOBA won't perform unnecessary calculations and will skip the layout & render phases
-		// Because of this, the FPS count will become god-tier. So let's force YOBA to perform full rendering process
+		// If UI hasn't changed, YOBA wouldn't perform unnecessary calculations and will skip layout & render phases.
+		// Because of this, the FPS count will become god-tier. So let's force YOBA to perform full update on every
+		// cycle to measure real performance
 		application.invalidate();
 
 		// Handling enqueued events, polling HIDs, playing animations, calling onTick(), etc.
@@ -723,12 +719,9 @@ int main() {
 		SFWindow.clear(sf::Color::Black);
 		SFWindow.draw(renderingTarget.getSprite());
 
-		char FPSTextBuffer[32];
-		std::snprintf(FPSTextBuffer, sizeof(FPSTextBuffer), "%lld FPS", FPSMeasurementDurationUs == 0 ? 0 : 1'000'000 / FPSMeasurementDurationUs);
-
 		sf::Text FPSText {
 			SFFont,
-			FPSTextBuffer,
+			std::format("{} FPS", FPSMeasurementDurationUs == 0 ? 0 : 1'000'000 / FPSMeasurementDurationUs),
 			16
 		};
 
