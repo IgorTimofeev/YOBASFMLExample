@@ -5,14 +5,26 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Main
-set(MAIN_SOURCES
-	src/main.cpp
-	src/Theme.cpp
+# YOBADesktopDemo
+add_executable(${PROJECT_NAME}
+  src/main.cpp
+  src/Theme.cpp
 )
 
-add_executable(main ${MAIN_SOURCES})
-target_compile_features(main PRIVATE cxx_std_23)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_23)
+
+# Resources (fonts, images, etc.)
+file(GLOB_RECURSE RESOURCE_FILES "resources/*")
+
+foreach(RESOURCE_FILE ${RESOURCE_FILES})
+  file(RELATIVE_PATH RESOURCE_FILE_RELATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}" "${RESOURCE_FILE}")
+
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+	"${RESOURCE_FILE}"
+	"$<TARGET_FILE_DIR:${PROJECT_NAME}>/${RESOURCE_FILE_RELATIVE_PATH}"
+  )
+endforeach()
 
 # SFML
 include(FetchContent)
@@ -26,10 +38,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SFML)
 
-target_link_libraries(main PRIVATE SFML::Graphics)
+target_link_libraries(${PROJECT_NAME} PRIVATE SFML::Graphics)
 
 # YOBA
 add_subdirectory(lib/YOBA)
-target_link_libraries(main PRIVATE YOBA)
-
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT main)
+target_link_libraries(${PROJECT_NAME} PRIVATE YOBA)

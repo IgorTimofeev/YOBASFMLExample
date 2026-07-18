@@ -19,8 +19,10 @@ int main() {
 
 	// -------------------------------- SFML window --------------------------------
 
-	constexpr static float virtualScreenRenderingScale = 2;
+	// Creating window that will simulate 240x320 display, which is widely used among Arduino kids
+	// To avoid eye bleeding, let's double the rendering scale
 	constexpr static Size virtualScreenResolution { 240, 320 };
+	constexpr static float virtualScreenRenderingScale = 2;
 
 	sf::RenderWindow SFWindow {
 		sf::VideoMode({
@@ -29,25 +31,28 @@ int main() {
 		}),
 		"YOBA | Desktop demo",
 		sf::Style::None | sf::Style::Titlebar | sf::Style::Close,
-		sf::State::Windowed,
-		sf::ContextSettings {
-			.antiAliasingLevel = 4
-		}
+		sf::State::Windowed
 	};
 
+	// No 144 Hz for you
 	SFWindow.setFramerateLimit(60);
 
-	sf::Font SFFont("C:\\Windows\\Fonts\\arial.ttf");
+	// Loading one of the sexiest pixelated fonts ever created
+	sf::Font SFFont { "resources/fonts/unscii-16.otf" };
+	SFFont.setSmooth(false);
 
-	// -------------------------------- YOBA renderer & rendering target --------------------------------
+	// -------------------------------- Renderer & rendering target --------------------------------
 
+	// Creating rendering target that encapsulates SFML sprite - it will be used by YOBA for flushing pixel data
+	// The sprite itself can be rendered later via window.draw()
 	SFMLSpriteRenderingTarget renderingTarget {};
 	renderingTarget.setup(virtualScreenResolution, virtualScreenRenderingScale);
 
+	// Creating straightforward renderer that doesn't care about CPU/RAM bearing (like RGB565 or Indexed does)
 	ARGBBufferedRenderer renderer {};
 	renderer.setTarget(&renderingTarget);
 
-	// -------------------------------- Tons of UI components --------------------------------
+	// -------------------------------- UI components  --------------------------------
 
 	Theme::setup();
 
@@ -641,17 +646,16 @@ int main() {
 	// -------------------------------- Main loop with SFML event handling --------------------------------
 
 	while (SFWindow.isOpen()) {
+		// Polling SFML events & translating it to YOBA events if they have similar nature
 		while (const auto event = SFWindow.pollEvent()) {
 			if (event->is<sf::Event::MouseButtonPressed>()) {
 				const auto mouseEvent = event->getIf<sf::Event::MouseButtonPressed>();
 
 				if (mouseEvent->button == sf::Mouse::Button::Left) {
-					PointerDownEvent pointerDownEvent {
-						Point(
-							static_cast<int32_t>(static_cast<float>(mouseEvent->position.x) / renderingTarget.getRenderingScale()),
-							static_cast<int32_t>(static_cast<float>(mouseEvent->position.y) / renderingTarget.getRenderingScale())
-						)
-					};
+					PointerDownEvent pointerDownEvent {{
+						static_cast<int32_t>(static_cast<float>(mouseEvent->position.x) / renderingTarget.getRenderingScale()),
+						static_cast<int32_t>(static_cast<float>(mouseEvent->position.y) / renderingTarget.getRenderingScale())
+					}};
 
 					application.pushEvent(&pointerDownEvent);
 				}
@@ -660,12 +664,10 @@ int main() {
 				const auto mouseEvent = event->getIf<sf::Event::MouseButtonReleased>();
 
 				if (mouseEvent->button == sf::Mouse::Button::Left) {
-					PointerUpEvent pointerUpEvent {
-						Point(
-							static_cast<int32_t>(static_cast<float>(mouseEvent->position.x) / renderingTarget.getRenderingScale()),
-							static_cast<int32_t>(static_cast<float>(mouseEvent->position.y) / renderingTarget.getRenderingScale())
-						)
-					};
+					PointerUpEvent pointerUpEvent {{
+						static_cast<int32_t>(static_cast<float>(mouseEvent->position.x) / renderingTarget.getRenderingScale()),
+						static_cast<int32_t>(static_cast<float>(mouseEvent->position.y) / renderingTarget.getRenderingScale())
+					}};
 
 					application.pushEvent(&pointerUpEvent);
 				}
@@ -673,12 +675,10 @@ int main() {
 			else if (event->is<sf::Event::MouseMoved>() && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
 				const auto mouseEvent = event->getIf<sf::Event::MouseMoved>();
 
-				PointerDragEvent pointerDragEvent {
-					Point(
-						static_cast<int32_t>(static_cast<float>(mouseEvent->position.x) / renderingTarget.getRenderingScale()),
-						static_cast<int32_t>(static_cast<float>(mouseEvent->position.y) / renderingTarget.getRenderingScale())
-					)
-				};
+				PointerDragEvent pointerDragEvent {{
+					static_cast<int32_t>(static_cast<float>(mouseEvent->position.x) / renderingTarget.getRenderingScale()),
+					static_cast<int32_t>(static_cast<float>(mouseEvent->position.y) / renderingTarget.getRenderingScale())
+				}};
 
 				application.pushEvent(&pointerDragEvent);
 			}
@@ -686,10 +686,10 @@ int main() {
 				const auto mouseWheelScrolledEvent = event->getIf<sf::Event::MouseWheelScrolled>();
 
 				MouseWheelEvent mouseWheelEvent {
-					Point(
+					{
 						static_cast<int32_t>(static_cast<float>(mouseWheelScrolledEvent->position.x) / renderingTarget.getRenderingScale()),
 						static_cast<int32_t>(static_cast<float>(mouseWheelScrolledEvent->position.y) / renderingTarget.getRenderingScale())
-					),
+					},
 					static_cast<int32_t>(mouseWheelScrolledEvent->delta) * 20
 				};
 
@@ -700,32 +700,36 @@ int main() {
 			}
 		}
 
-		// -------------------------------- YOBA tick handling & rendering --------------------------------
-
 		const auto FPSMeasurementStart = std::chrono::steady_clock::now();
 
+		// If UI state hasn't changed, YOBA won't perform unnecessary calculations and will skip the layout & render phases
+		// Because of this, the FPS count will become god-tier. So let's force YOBA to perform full rendering process
 		application.invalidate();
+
+		// Handling enqueued events, polling HIDs, playing animations, calling onTick(), etc.
 		application.tick();
+
+		// Computing size of UI elements & arranging them in the screen space
 		application.updateLayout();
+
+		// Rendering UI on assigned rendering target (SFML window in this case)
 		application.render();
 
 		const auto FPSMeasurementDurationUs =
 			std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - FPSMeasurementStart)
 			.count();
 
-		// -------------------------------- SFML rendering  --------------------------------
-
-		// Rendering FPS counter
+		// Rendering FPS counter on SFML window
 		SFWindow.clear(sf::Color::Black);
 		SFWindow.draw(renderingTarget.getSprite());
 
 		char FPSTextBuffer[32];
-		std::snprintf(FPSTextBuffer, sizeof(FPSTextBuffer), "%lld FPS", 1'000'000 / FPSMeasurementDurationUs);
+		std::snprintf(FPSTextBuffer, sizeof(FPSTextBuffer), "%lld FPS", FPSMeasurementDurationUs == 0 ? 0 : 1'000'000 / FPSMeasurementDurationUs);
 
 		sf::Text FPSText {
 			SFFont,
 			FPSTextBuffer,
-			15
+			16
 		};
 
 		FPSText.setPosition({ 10, 10 });
@@ -733,7 +737,7 @@ int main() {
 		FPSText.setFillColor(sf::Color::Magenta);
 		SFWindow.draw(FPSText);
 
-		// Showing all changes in window
+		// Finally, displaying all buffered changes in SFML window
 		SFWindow.display();
 	}
 }
