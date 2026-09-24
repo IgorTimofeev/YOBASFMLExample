@@ -36,7 +36,7 @@ int main() {
 	};
 
 	// Loading one of the sexiest pixelated fonts ever created
-	sf::Font SFFont { "resources/fonts/unscii-16.otf" };
+	sf::Font SFFont { "Resources/Fonts/unscii-16.otf" };
 	SFFont.setSmooth(false);
 
 	// -------------------------------- Renderer & rendering target --------------------------------
@@ -672,7 +672,6 @@ int main() {
 			.count();
 
 		// Rendering FPS counter on SFML window
-		SFWindow.clear(sf::Color::Black);
 		SFWindow.draw(renderingTarget.getSprite());
 
 		sf::Text FPSText {
