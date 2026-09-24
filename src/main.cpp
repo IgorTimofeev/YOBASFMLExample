@@ -35,9 +35,6 @@ int main() {
 		sf::State::Windowed
 	};
 
-	// No 144 Hz for you
-	SFWindow.setFramerateLimit(60);
-
 	// Loading one of the sexiest pixelated fonts ever created
 	sf::Font SFFont { "resources/fonts/unscii-16.otf" };
 	SFFont.setSmooth(false);
@@ -46,16 +43,18 @@ int main() {
 
 	// Creating rendering target that encapsulates SFML sprite - it will be used by YOBA for flushing pixel data
 	// The sprite itself can be rendered later via window.draw()
-	SFMLSpriteRenderingTarget renderingTarget {};
-	renderingTarget.setup(virtualScreenResolution, virtualScreenRenderingScale);
+	SFMLRenderingTarget renderingTarget {};
+	renderingTarget.setup(virtualScreenResolution);
+	renderingTarget.setRenderingScale(virtualScreenRenderingScale);
 
 	// Creating straightforward renderer that doesn't care about CPU/RAM bearing (like RGB565 or Indexed does)
-	ARGBBufferedRenderer renderer {};
+	SFMLRenderer renderer {};
 	renderer.setTarget(&renderingTarget);
 
 	// -------------------------------- UI components  --------------------------------
 
 	Theme::setup();
+	Images::setup();
 
 	Application application {};
 	application.setRenderer(&renderer);
@@ -204,10 +203,10 @@ int main() {
 	};
 
 	ImageAndBadge imagesAndBadges[4] {
-		{ &Images::menuIconDev, "1"},
-		{ &Images::menuIconMFD, "2"},
-		{ &Images::menuIconMFDAutopilot, "3"},
-		{ &Images::menuIconPersonalization, "4"},
+		{ &Images::menuIconDev.image, "1"},
+		{ &Images::menuIconMFD.image, "2"},
+		{ &Images::menuIconMFDAutopilot.image, "3"},
+		{ &Images::menuIconPersonalization.image, "4"},
 	};
 
 	for (auto& imageAndBadge : imagesAndBadges)
@@ -595,7 +594,7 @@ int main() {
 		const auto dialog = new ConfirmationDialog {};
 
 		dialog->setup(
-			&Images::menuIconMFD,
+			&Images::menuIconMFD.image,
 			"Retard alert",
 			"Are you sure want to delete QueenSnakePrn.mov? This action is permanent.",
 			[dialog, &progressAnimation](const bool confirmed) {
@@ -641,57 +640,14 @@ int main() {
 	// -------------------------------- Main loop with SFML event handling --------------------------------
 
 	while (SFWindow.isOpen()) {
-		// Polling SFML events & translating it to YOBA events if they have similar nature
+		// Polling SFML events
 		while (const auto event = SFWindow.pollEvent()) {
-			if (event->is<sf::Event::MouseButtonPressed>()) {
-				const auto mouseEvent = event->getIf<sf::Event::MouseButtonPressed>();
-
-				if (mouseEvent->button == sf::Mouse::Button::Left) {
-					PointerDownEvent pointerDownEvent {{
-						static_cast<int32_t>(static_cast<float>(mouseEvent->position.x) / renderingTarget.getRenderingScale()),
-						static_cast<int32_t>(static_cast<float>(mouseEvent->position.y) / renderingTarget.getRenderingScale())
-					}};
-
-					application.pushEvent(&pointerDownEvent);
-				}
-			}
-			else if (event->is<sf::Event::MouseButtonReleased>()) {
-				const auto mouseEvent = event->getIf<sf::Event::MouseButtonReleased>();
-
-				if (mouseEvent->button == sf::Mouse::Button::Left) {
-					PointerUpEvent pointerUpEvent {{
-						static_cast<int32_t>(static_cast<float>(mouseEvent->position.x) / renderingTarget.getRenderingScale()),
-						static_cast<int32_t>(static_cast<float>(mouseEvent->position.y) / renderingTarget.getRenderingScale())
-					}};
-
-					application.pushEvent(&pointerUpEvent);
-				}
-			}
-			else if (event->is<sf::Event::MouseMoved>() && sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
-				const auto mouseEvent = event->getIf<sf::Event::MouseMoved>();
-
-				PointerDragEvent pointerDragEvent {{
-					static_cast<int32_t>(static_cast<float>(mouseEvent->position.x) / renderingTarget.getRenderingScale()),
-					static_cast<int32_t>(static_cast<float>(mouseEvent->position.y) / renderingTarget.getRenderingScale())
-				}};
-
-				application.pushEvent(&pointerDragEvent);
-			}
-			else if (event->is<sf::Event::MouseWheelScrolled>()) {
-				const auto mouseWheelScrolledEvent = event->getIf<sf::Event::MouseWheelScrolled>();
-
-				MouseWheelEvent mouseWheelEvent {
-					{
-						static_cast<int32_t>(static_cast<float>(mouseWheelScrolledEvent->position.x) / renderingTarget.getRenderingScale()),
-						static_cast<int32_t>(static_cast<float>(mouseWheelScrolledEvent->position.y) / renderingTarget.getRenderingScale())
-					},
-					static_cast<int32_t>(mouseWheelScrolledEvent->delta) * 20
-				};
-
-				application.pushEvent(&mouseWheelEvent);
-			}
-			else if (event->is<sf::Event::Closed>()) {
+			if (event->is<sf::Event::Closed>()) {
 				SFWindow.close();
+			}
+			else {
+				// Translating SFML events to YOBA events if they have similar nature (pointer, drag, scroll, etc.)
+				SFMLEvents::handleMouse(event, &application, renderingTarget.getRenderingScale());
 			}
 		}
 
